@@ -1,9 +1,10 @@
-// Flutter code sample for Card
-
-// This sample shows creation of a [Card] widget that shows album information
-// and two actions.
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:listkontrakapp/detail_kontrak.dart';
+import 'package:listkontrakapp/enum_app.dart';
+import 'package:listkontrakapp/kontrakeditor.dart';
+import 'package:listkontrakapp/util/process_string.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,11 +15,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        fontFamily: 'Opensans',
+      ),
       title: _title,
       home: Scaffold(
         // appBar: AppBar(title: const Text(_title)),
         body: Dashboard(),
       ),
+      navigatorObservers: <NavigatorObserver>[
+        SwipeBackObserver(),
+      ],
     );
   }
 }
@@ -29,15 +36,66 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  final TextStyle _styleButton = new TextStyle(
+      fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12.0);
+
+  Widget _button(String text, Function clickAction) {
+    return RaisedButton(
+      color: Colors.cyan[600],
+      child: Text(text, style: _styleButton),
+      onPressed: clickAction,
+    );
+  }
+
+  void _clickKontrakBaru() {
+    openPage(context, KontrakEditor(EnumStateEditor.baru));
+  }
+
+  Future openPage(context, Widget builder) async {
+    // wait until animation finished
+    await SwipeBackObserver.promise?.future;
+
+    return await Navigator.of(context).push(
+      MaterialPageRoute(builder: (ctx) => builder),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          CardDashboard(),
-          CardDashboard(),
-          CardDashboard(),
+          SizedBox(
+            height: 40,
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: 60.0,
+              ),
+              _button('Buat Kontrak Baru', _clickKontrakBaru),
+              SizedBox(
+                width: 12,
+              ),
+              _button('Tampilkan Semua Kontrak', () {})
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+                left: 55.0, right: 55.0, top: 15.0, bottom: 10.0),
+            child: Container(
+              height: 2,
+              color: Colors.grey,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CardDashboard(),
+              CardDashboard(),
+              CardDashboard(),
+            ],
+          ),
         ],
       ),
     );
@@ -53,18 +111,114 @@ class CardDashboard extends StatefulWidget {
 }
 
 class _CardDashboardState extends State<CardDashboard> {
+  final TextStyle _titleStyle =
+      new TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
+  final TextStyle _titleStyleContent = new TextStyle(
+    fontSize: 10,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   TableRow _headerTable() {
     return TableRow(children: [
-      Center(child: Text('No Kontrak')),
-      Center(child: Text('Nama Kontrak')),
-      Center(child: Text('Tanggal Berakhir')),
+      TableCell(
+          verticalAlignment: TableCellVerticalAlignment.middle,
+          child: Center(
+              child: Text(
+            'No Kontrak',
+            style: _titleStyle,
+          ))),
+      TableCell(
+          verticalAlignment: TableCellVerticalAlignment.middle,
+          child: Center(
+              child: Text(
+            'Nama Kontrak',
+            style: _titleStyle,
+          ))),
+      TableCell(
+          verticalAlignment: TableCellVerticalAlignment.middle,
+          child: Center(
+              child: Column(
+            children: [
+              Text(
+                'Tanggal',
+                style: _titleStyle,
+              ),
+              Text(
+                'Berakhir',
+                style: _titleStyle,
+              )
+            ],
+          ))),
     ]);
+  }
+
+  TableRow _contentTable(Kontrak kontrak) {
+    return TableRow(children: [
+      _textNoDanTanggal(kontrak.noKontrak, kontrak),
+      _textContentJudul(kontrak.nama, kontrak),
+      _textNoDanTanggal(kontrak.strTglBerakhir, kontrak),
+    ]);
+  }
+
+  Widget _textContentJudul(String text, Kontrak kontrak) {
+    return TableCell(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(text, style: _titleStyleContent),
+      ),
+    );
+  }
+
+  Widget _textNoDanTanggal(String text, Kontrak kontrak) {
+    return TableCell(
+      verticalAlignment: TableCellVerticalAlignment.middle,
+      child: InkWell(
+          onTap: () async {
+            await openPage(context, DetailKontrak());
+          },
+          child: Center(child: Text(text, style: _titleStyleContent))),
+    );
+  }
+
+  List<TableRow> _table(List<Kontrak> lk) {
+    List<TableRow> lrow = new List();
+    lrow.add(this._headerTable());
+    for (int i = 0; i < lk.length; i++) {
+      lrow.add(this._contentTable(lk[i]));
+    }
+    return lrow;
+  }
+
+  List<Kontrak> _createDummyKontrak() {
+    List<Kontrak> lk = new List();
+    lk.add(new Kontrak(
+        'RR2015/12/20',
+        'Pengadaan komputer dan Printer divisi IT Pertamina',
+        DateTime(2019, 12, 20)));
+    lk.add(new Kontrak(
+        'RR2016/12/20',
+        'Pengadaan komputer dan Printer divisi IT Pertamina',
+        DateTime(2020, 12, 20)));
+    lk.add(new Kontrak(
+        'RR2016/12/20',
+        'Pengadaan komputer dan Printer divisi IT Pertamina',
+        DateTime(2021, 12, 20)));
+    lk.add(new Kontrak(
+        'RR2016/12/20',
+        'Pengadaan komputer dan Printer divisi IT Pertamina',
+        DateTime(2022, 12, 20)));
+    return lk;
   }
 
   @override
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
-    double width = (mediaQueryData.size.width - 20) / 4;
+    double width = (mediaQueryData.size.width - 120) / 3;
+    List<Kontrak> lkontrak = _createDummyKontrak();
     return Card(
       child: Container(
         width: width,
@@ -78,101 +232,70 @@ class _CardDashboardState extends State<CardDashboard> {
               child: Center(
                 child: Text(
                   '0 - 90 Hari',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
             ),
             Table(
-
               border: TableBorder.all(),
-              children: [
-                _headerTable(),
-                TableRow(children: [
-                  Icon(
-                    Icons.cake,
-                    size: 20,
-                  ),
-                  Icon(
-                    Icons.voice_chat,
-                    size: 20,
-                  ),
-                  Icon(
-                    Icons.add_location,
-                    size: 20,
-                  ),
-                ]),
-              ],
+              columnWidths: {
+                0: FlexColumnWidth(1),
+                // 0: FlexColumnWidth(4.501), // - is ok
+                // 0: FlexColumnWidth(4.499), //- ok as well
+                1: FlexColumnWidth(2),
+                2: FlexColumnWidth(1),
+              },
+              children: this._table(lkontrak),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class MyApp1 extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
+  Future openPage(context, Widget builder) async {
+    // wait until animation finished
+    await SwipeBackObserver.promise?.future;
 
-class _MyAppState extends State<MyApp1> {
-  double iconSize = 40;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-          appBar: AppBar(
-            title: Text('Flutter Table - tutorialkart.com'),
-          ),
-          body: Center(
-              child: Column(children: <Widget>[
-            Container(
-              margin: EdgeInsets.all(10),
-              child: Table(
-                border: TableBorder.all(),
-                children: [
-                  TableRow(children: [
-                    Column(children: [
-                      Icon(
-                        Icons.account_box,
-                        size: iconSize,
-                      ),
-                      Text('My Account')
-                    ]),
-                    Column(children: [
-                      Icon(
-                        Icons.settings,
-                        size: iconSize,
-                      ),
-                      Text('Settings')
-                    ]),
-                    Column(children: [
-                      Icon(
-                        Icons.lightbulb_outline,
-                        size: iconSize,
-                      ),
-                      Text('Ideas')
-                    ]),
-                  ]),
-                  TableRow(children: [
-                    Icon(
-                      Icons.cake,
-                      size: iconSize,
-                    ),
-                    Icon(
-                      Icons.voice_chat,
-                      size: iconSize,
-                    ),
-                    Icon(
-                      Icons.add_location,
-                      size: iconSize,
-                    ),
-                  ]),
-                ],
-              ),
-            ),
-          ]))),
+    return await Navigator.of(context).push(
+      MaterialPageRoute(builder: (ctx) => builder),
     );
+  }
+}
+
+class Kontrak {
+  String _noKontrak;
+  String _nama;
+  DateTime _tglBerakhir;
+
+  Kontrak(this._noKontrak, this._nama, this._tglBerakhir);
+
+  ProcessString _processString = new ProcessString();
+
+  String get noKontrak => _noKontrak;
+
+  String get nama => _nama;
+
+  DateTime get tglBerakhir => _tglBerakhir;
+
+  String get strTglBerakhir =>
+      _processString.dateToStringDdMmmYyyyShort(_tglBerakhir);
+}
+
+class SwipeBackObserver extends NavigatorObserver {
+  static Completer promise;
+
+  @override
+  void didStartUserGesture(Route route, Route previousRoute) {
+    // make a new promise
+    promise = Completer();
+    super.didStartUserGesture(route, previousRoute);
+  }
+
+  @override
+  void didStopUserGesture() {
+    super.didStopUserGesture();
+    // resolve the promise
+    promise.complete();
   }
 }
