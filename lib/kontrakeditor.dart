@@ -143,7 +143,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
             labelStyle: TextStyle(
               fontSize: 12,
               color: Colors.blue,
-            )),
+            ),
+          border: const OutlineInputBorder(),
+        ),
       ),
     );
   }

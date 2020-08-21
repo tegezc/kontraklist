@@ -1,5 +1,4 @@
 class ProcessString {
-
   static final namaHari = const [
     'Mgg',
     'Sen',
@@ -40,6 +39,7 @@ class ProcessString {
     'Nov',
     'Des'
   ];
+
 /*
 * ex: 2019-03
 * */
@@ -49,7 +49,7 @@ class ProcessString {
   }
 
   /*
-  * ex: 21-03-2019
+  * ex: 01-03-2019
   * */
   String dateToStringDdMmYyyy(DateTime dateTime) {
     String tanggal =
@@ -79,8 +79,7 @@ class ProcessString {
   * ex: Maret 2019
   * */
   String dateToStringMmmmYyyy(DateTime dateTime) {
-    String tanggal =
-        '${namaBulan[dateTime.month]} ${dateTime.year}';
+    String tanggal = '${namaBulan[dateTime.month]} ${dateTime.year}';
     return tanggal;
   }
 
@@ -102,7 +101,9 @@ class ProcessString {
     return tanggal;
   }
 
-
+  /*
+  * ex: 2019-01-01
+  * */
   DateTime dateFromDbToDateTime(String tanggal) {
     var tmp = tanggal.split('-');
     if (tmp.length == 3) {
@@ -110,6 +111,32 @@ class ProcessString {
         int year = int.parse(tmp[0]);
         int month = int.parse(tmp[1]);
         int day = int.parse(tmp[2]);
+
+        return DateTime(year, month, day);
+      } catch (e) {
+        //jika format salah, maka di set sekarang. ini dilakukan jika format salah
+        // tidak menyebabkan aplikasi force close, namun mengakibatkan anomali data
+
+        return DateTime.now();
+      }
+    } else {
+      //jika format salah, maka di set sekarang. ini dilakukan jika format salah
+      // tidak menyebabkan aplikasi force close, namun mengakibatkan anomali data
+
+      return DateTime.now();
+    }
+  }
+
+  /*
+  * ex: 01-01-2019
+  * */
+  DateTime dateFromTextToDateTime(String tanggal) {
+    var tmp = tanggal.split('-');
+    if (tmp.length == 3) {
+      try {
+        int year = int.parse(tmp[2]);
+        int month = int.parse(tmp[1]);
+        int day = int.parse(tmp[0]);
 
         return DateTime(year, month, day);
       } catch (e) {

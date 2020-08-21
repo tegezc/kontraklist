@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:listkontrakapp/allkontrak.dart';
 import 'package:listkontrakapp/detail_kontrak.dart';
 import 'package:listkontrakapp/enum_app.dart';
 import 'package:listkontrakapp/kontrakeditor.dart';
-import 'package:listkontrakapp/util/process_string.dart';
+import 'package:listkontrakapp/model/kontrak.dart';
+import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 
 void main() => runApp(MyApp());
 
@@ -47,8 +49,12 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _clickKontrakBaru() {
-    openPage(context, KontrakEditor(EnumStateEditor.baru));
+  void _clickKontrakBaru() async{
+    await openPage(context, KontrakEditor(EnumStateEditor.baru));
+  }
+
+  void _clickTampilkansemua()async{
+    await openPage(context, ShowAllKontrak());
   }
 
   Future openPage(context, Widget builder) async {
@@ -77,7 +83,9 @@ class _DashboardState extends State<Dashboard> {
               SizedBox(
                 width: 12,
               ),
-              _button('Tampilkan Semua Kontrak', () {})
+              _button('Tampilkan Semua Kontrak', () {
+                _clickTampilkansemua();
+              })
             ],
           ),
           Padding(
@@ -261,25 +269,6 @@ class _CardDashboardState extends State<CardDashboard> {
       MaterialPageRoute(builder: (ctx) => builder),
     );
   }
-}
-
-class Kontrak {
-  String _noKontrak;
-  String _nama;
-  DateTime _tglBerakhir;
-
-  Kontrak(this._noKontrak, this._nama, this._tglBerakhir);
-
-  ProcessString _processString = new ProcessString();
-
-  String get noKontrak => _noKontrak;
-
-  String get nama => _nama;
-
-  DateTime get tglBerakhir => _tglBerakhir;
-
-  String get strTglBerakhir =>
-      _processString.dateToStringDdMmmYyyyShort(_tglBerakhir);
 }
 
 class SwipeBackObserver extends NavigatorObserver {
