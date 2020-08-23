@@ -21,10 +21,8 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Opensans',
       ),
       title: _title,
-      home: Scaffold(
-        // appBar: AppBar(title: const Text(_title)),
-        body: Dashboard(),
-      ),
+//      home: DKontrak(null),
+    home: DetailKontrak(null),
       navigatorObservers: <NavigatorObserver>[
         SwipeBackObserver(),
       ],
@@ -68,43 +66,45 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          SizedBox(
-            height: 40,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 60.0,
-              ),
-              _button('Buat Kontrak Baru', _clickKontrakBaru),
-              SizedBox(
-                width: 12,
-              ),
-              _button('Tampilkan Semua Kontrak', () {
-                _clickTampilkansemua();
-              })
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 55.0, right: 55.0, top: 15.0, bottom: 10.0),
-            child: Container(
-              height: 2,
-              color: Colors.grey,
+    return Scaffold(
+      body: Container(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 40,
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CardDashboard(),
-              CardDashboard(),
-              CardDashboard(),
-            ],
-          ),
-        ],
+            Row(
+              children: [
+                SizedBox(
+                  width: 60.0,
+                ),
+                _button('Buat Kontrak Baru', _clickKontrakBaru),
+                SizedBox(
+                  width: 12,
+                ),
+                _button('Tampilkan Semua Kontrak', () {
+                  _clickTampilkansemua();
+                })
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 55.0, right: 55.0, top: 15.0, bottom: 10.0),
+              child: Container(
+                height: 2,
+                color: Colors.grey,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CardDashboard(),
+                CardDashboard(),
+                CardDashboard(),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -186,7 +186,7 @@ class _CardDashboardState extends State<CardDashboard> {
       verticalAlignment: TableCellVerticalAlignment.middle,
       child: InkWell(
           onTap: () async {
-            await openPage(context, DetailKontrak());
+            await openPage(context, DetailKontrak(kontrak));
           },
           child: Center(child: Text(text, style: _titleStyleContent))),
     );
