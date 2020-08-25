@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:listkontrakapp/allkontrak.dart';
-import 'package:listkontrakapp/detail_kontrak.dart';
+import 'package:listkontrakapp/detailkontrak/detail_kontrak.dart';
+import 'package:listkontrakapp/detailkontrak/logdoceditor.dart';
 import 'package:listkontrakapp/enum_app.dart';
 import 'package:listkontrakapp/kontrakeditor.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
       ),
       title: _title,
 //      home: DKontrak(null),
-    home: DetailKontrak(null),
+      home: Dashboard(),
       navigatorObservers: <NavigatorObserver>[
         SwipeBackObserver(),
       ],
@@ -47,11 +48,11 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _clickKontrakBaru() async{
+  void _clickKontrakBaru() async {
     await openPage(context, KontrakEditor(EnumStateEditor.baru));
   }
 
-  void _clickTampilkansemua()async{
+  void _clickTampilkansemua() async {
     await openPage(context, ShowAllKontrak());
   }
 
@@ -95,8 +96,8 @@ class _DashboardState extends State<Dashboard> {
                 color: Colors.grey,
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              direction: Axis.horizontal,
               children: [
                 CardDashboard(),
                 CardDashboard(),

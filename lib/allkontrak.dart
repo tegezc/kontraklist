@@ -36,6 +36,7 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData md = MediaQuery.of(context);
     if (_listKontrak == null) {
       return LoadingNungguData();
     } else if (_listKontrak.isEmpty) {
@@ -44,47 +45,55 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
       return Scaffold(
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Center(
-            child: PaginatedDataTable(
-              columnSpacing: 40,
-              source: _dtsKontrak,
-              columns: [
-                DataColumn(
-                  label: Text(DataTableConstants.colAction),
-                ),
-                DataColumn(label: Text(DataTableConstants.colNoKontrak)),
-                DataColumn(
-                  label: Text(DataTableConstants.colNmKontrak),
-                  onSort: (colIndex, asc) {
-                    _sort<String>(
-                        (kontrak) => kontrak.nama, colIndex, asc, _dtsKontrak);
-                  },
-                ),
-                DataColumn(label: Text(DataTableConstants.colNmUnit)),
-                DataColumn(
-                    label: Text(DataTableConstants.colNilai),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                child: FlatButton.icon(onPressed: (){
+                  Navigator.of(context).pop();
+                }, icon: Icon(Icons.keyboard_backspace), label: Text('Kemabli')),
+              ),
+              PaginatedDataTable(
+                columnSpacing: 40,
+                source: _dtsKontrak,
+                columns: [
+                  DataColumn(
+                    label: Text(DataTableConstants.colAction),
+                  ),
+                  DataColumn(label: Text(DataTableConstants.colNoKontrak)),
+                  DataColumn(
+                    label: Text(DataTableConstants.colNmKontrak),
                     onSort: (colIndex, asc) {
-                      _sortInt((kontrak) => kontrak.nilai, colIndex, asc,
-                          _dtsKontrak);
+                      _sort<String>(
+                          (kontrak) => kontrak.nama, colIndex, asc, _dtsKontrak);
                     },
-                    numeric: true),
-                DataColumn(
-                  label: Text(DataTableConstants.colTglBerakhir),
-                  onSort: (colIndex, asc) {
-                    _sort<DateTime>((kontrak) => kontrak.tglBerakhir, colIndex,
-                        asc, _dtsKontrak);
-                  },
-                ),
-                DataColumn(label: Text(DataTableConstants.colDetail)),
-              ],
-              header: Center(child: Text(DataTableConstants.dtTitle)),
-              onRowsPerPageChanged: (r) {
-                setState(() {
-                  _rowPerPage = r;
-                });
-              },
-              rowsPerPage: _rowPerPage,
-            ),
+                  ),
+                  DataColumn(label: Text(DataTableConstants.colNmUnit)),
+                  DataColumn(
+                      label: Text(DataTableConstants.colNilai),
+                      onSort: (colIndex, asc) {
+                        _sortInt((kontrak) => kontrak.nilai, colIndex, asc,
+                            _dtsKontrak);
+                      },
+                      numeric: true),
+                  DataColumn(
+                    label: Text(DataTableConstants.colTglBerakhir),
+                    onSort: (colIndex, asc) {
+                      _sort<DateTime>((kontrak) => kontrak.tglBerakhir, colIndex,
+                          asc, _dtsKontrak);
+                    },
+                  ),
+                  DataColumn(label: Text(DataTableConstants.colDetail)),
+                ],
+                header: Center(child: Text(DataTableConstants.dtTitle)),
+                onRowsPerPageChanged: (r) {
+                  setState(() {
+                    _rowPerPage = r;
+                  });
+                },
+                rowsPerPage: _rowPerPage,
+              ),
+            ],
           ),
         ),
       );
@@ -117,8 +126,6 @@ class KontrakDataSourceTable extends DataTableSource {
   @override
   DataRow getRow(int index) {
     Kontrak k = _lkontrak[index];
-    String str = k.nama.substring(0, 70);
-    String str1 = k.nama.substring(71, k.nama.length);
 
     return DataRow.byIndex(index: index, cells: [
       DataCell(Text('Action delete / Edit'), showEditIcon: true),

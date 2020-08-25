@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/util/process_string.dart';
 
@@ -47,27 +48,27 @@ class Kontrak {
 //      this._kontrakAwal);
 
   Kontrak.fromJson(Map<String, dynamic> json) {
-    DateTime dtmulai = _processString.dateFromTextToDateTime(
-        json[DataJSONCons.fieldTglMulai]);
-    DateTime dtberakhir = _processString.dateFromTextToDateTime(
-        json[DataJSONCons.fieldTglBerakhir]);
+    DateTime dtmulai =
+        _processString.dateFromTextToDateTime(json[DataJSONCons.fieldTglMulai]);
+    DateTime dtberakhir = _processString
+        .dateFromTextToDateTime(json[DataJSONCons.fieldTglBerakhir]);
     this.realID = json[DataJSONCons.fieldRealId];
     this._noKontrak = json[DataJSONCons.fieldNoKontrak];
-    this._nama =  json[DataJSONCons.fieldNmKontrak];
-    this._namaUnit =   json[DataJSONCons.fieldNmUnit];
-    this._region =  json[DataJSONCons.fieldRegion];
+    this._nama = json[DataJSONCons.fieldNmKontrak];
+    this._namaUnit = json[DataJSONCons.fieldNmUnit];
+    this._region = json[DataJSONCons.fieldRegion];
     this._stream = json[DataJSONCons.fieldStream];
-    this._durasi =  json[DataJSONCons.fieldDurasi];
-    this._nilai =   json[DataJSONCons.fieldNilai];
+    this._durasi = json[DataJSONCons.fieldDurasi];
+    this._nilai = json[DataJSONCons.fieldNilai];
     this._tglMulai = dtmulai;
     this._tglBerakhir = dtberakhir;
     this._nmPICKontrak = json[DataJSONCons.fieldNmPicKontrak];
-    this._noHpPICKontrak =  json[DataJSONCons.fieldNoHpPicKontrak];
-    this._emailPICKontrak =  json[DataJSONCons.fieldEmailPicKontrak];
+    this._noHpPICKontrak = json[DataJSONCons.fieldNoHpPicKontrak];
+    this._emailPICKontrak = json[DataJSONCons.fieldEmailPicKontrak];
     this._nmVendor = json[DataJSONCons.fieldNmVendor];
     this._nmPICVendor = json[DataJSONCons.fieldNmPicVendor];
-    this._noHpPICVendor  =  json[DataJSONCons.fieldNoHpPicVendor];
-    this._emailPICVendor =  json[DataJSONCons.fieldEmailPicVendor];
+    this._noHpPICVendor = json[DataJSONCons.fieldNoHpPicVendor];
+    this._emailPICVendor = json[DataJSONCons.fieldEmailPicVendor];
     this._direksi = json[DataJSONCons.fieldDireksi];
     this._penandatangan = json[DataJSONCons.fieldPenandatangan];
     this._kontrakAwal = json[DataJSONCons.fieldKontrakAwal];
@@ -129,10 +130,10 @@ class Kontrak {
       DataJSONCons.fieldStream: _stream,
       DataJSONCons.fieldDurasi: _durasi,
       DataJSONCons.fieldNilai: _nilai,
-      DataJSONCons.fieldTglMulai: _processString.dateToStringDdMmYyyy(
-          _tglMulai),
-      DataJSONCons.fieldTglBerakhir: _processString.dateToStringDdMmYyyy(
-          _tglBerakhir),
+      DataJSONCons.fieldTglMulai:
+          _processString.dateToStringDdMmYyyy(_tglMulai),
+      DataJSONCons.fieldTglBerakhir:
+          _processString.dateToStringDdMmYyyy(_tglBerakhir),
       DataJSONCons.fieldNmPicKontrak: _nmPICKontrak,
       DataJSONCons.fieldNoHpPicKontrak: _noHpPICKontrak,
       DataJSONCons.fieldEmailPicKontrak: _emailPICKontrak,
@@ -144,5 +145,61 @@ class Kontrak {
       DataJSONCons.fieldPenandatangan: _penandatangan,
       DataJSONCons.fieldKontrakAwal: _kontrakAwal
     };
+  }
+}
+
+class LogDokumen {
+  String namaReviewer;
+  String keterangan;
+  DateTime tanggal;
+  int versi;
+  String linkPdf;
+  String linkDoc;
+
+  LogDokumen(
+      {@required this.namaReviewer,
+      @required this.keterangan,
+      @required this.tanggal,
+      @required this.versi,
+      @required this.linkPdf,
+      this.linkDoc});
+
+  String get strTanggal{
+    ProcessString processString = new ProcessString();
+    return processString.dateToStringDdMmmmYyyy(tanggal);
+  }
+
+  static List<LogDokumen> getDummyLog() {
+    return <LogDokumen>[
+      LogDokumen(
+        namaReviewer: "Captain America",
+        keterangan: "Shield",
+        tanggal: DateTime.now(),
+        versi: 1,
+        linkPdf: 'link ke pdf',
+        linkDoc: 'linkkedoc',
+      ),  LogDokumen(
+        namaReviewer: "Captain America",
+        keterangan: "Shield",
+        tanggal: DateTime.now(),
+        versi: 2,
+        linkPdf: 'link ke pdf',
+        linkDoc: 'linkkedoc',
+      ),  LogDokumen(
+        namaReviewer: "Captain America",
+        keterangan: "Shield",
+        tanggal: DateTime.now(),
+        versi: 3,
+        linkPdf: 'link ke pdf',
+        linkDoc: 'linkkedoc',
+      ),  LogDokumen(
+        namaReviewer: "Captain America",
+        keterangan: "Shield",
+        tanggal: DateTime.now(),
+        versi: 4,
+        linkPdf: 'link ke pdf',
+        linkDoc: 'linkkedoc',
+      )
+    ];
   }
 }

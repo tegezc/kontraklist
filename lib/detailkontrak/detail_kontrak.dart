@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listkontrakapp/detailkontrak/logdoc_view.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 
-final double widthCell = 200.0;
+final double widthCell = 250.0;
+
 class DetailKontrak extends StatefulWidget {
   final Kontrak kontrak;
 
@@ -16,141 +18,102 @@ class DetailKontrak extends StatefulWidget {
 }
 
 class _DetailKontrakState extends State<DetailKontrak> {
+  final _scrollControllerUtama = ScrollController();
+  final _scrollControllerTable = ScrollController();
 
+  @override
+  void dispose(){
+    _scrollControllerTable.dispose();
+    _scrollControllerUtama.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width / 20;
     double widthtable = width * 19;
+    double widhtLog = width * 16;
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Avengers DataTable"),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Column(
-            children: [
-              Card(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Table2column(null, widthtable),
-                      Table5column(null, widthtable),
-                      SizedBox(height: 20,),
-                      CardPICKontrak(null,widthtable),
-                      SizedBox(height: 16,),
-                     CardVendor(null,widthtable),
-                    ],
+      body: Scrollbar(
+        controller: _scrollControllerUtama,
+        isAlwaysShown: true,
+        child: SingleChildScrollView(
+          controller: _scrollControllerUtama,
+          scrollDirection: Axis.vertical,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left:40.0,top:20),
+                      child: FlatButton.icon(onPressed: (){
+                        Navigator.of(context).pop();
+                      }, icon: Icon(Icons.keyboard_backspace), label: Text('Kemabli')),
+                    ),
+                    Spacer(),
+                  ],
+                ),
+                _header(),
+                Card(
+                  child: Scrollbar(
+                    isAlwaysShown: true,
+                    controller: _scrollControllerTable,
+                    child: SingleChildScrollView(
+                      controller: _scrollControllerTable,
+                      scrollDirection: Axis.horizontal,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 10,),
+                            Table2column(null, widthtable),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            Table5column(null, widthtable),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            CardPICKontrak(null, widthtable),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            CardVendor(null, widthtable),
+                            SizedBox(height: 10,),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-
-              Expansionpanel(),
-              SizedBox(
-                height: 400,
-              ),
-            ],
+                SizedBox(
+                  height: 30,
+                ),
+                Expansionpanel(widhtLog),
+                SizedBox(
+                  height: 400,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-}
 
-class LogDocumentView extends StatefulWidget {
-  @override
-  _LogDocumentViewState createState() => _LogDocumentViewState();
-}
-
-class _LogDocumentViewState extends State<LogDocumentView> {
-  List<Avengers> avengers;
-  List<Avengers> selectedAvengers;
-  bool sort;
-
-
-
-  @override
-  void initState() {
-    sort = false;
-    selectedAvengers = [];
-    avengers = Avengers.getAvengers();
-    super.initState();
-  }
-
-  onSortColum(int columnIndex, bool ascending) {
-    if (columnIndex == 0) {
-      if (ascending) {
-        avengers.sort((a, b) => a.name.compareTo(b.name));
-      } else {
-        avengers.sort((a, b) => b.name.compareTo(a.name));
-      }
-    }
-  }
-  @override
-  Widget build(BuildContext context) {
-    return   Padding(
-      padding: const EdgeInsets.only(top: 30.0),
-      child: DataTable(
-        sortAscending: sort,
-        sortColumnIndex: 0,
-        columns: [
-          DataColumn(
-              label: Text("Name", style: TextStyle(fontSize: 16)),
-              numeric: false,
-              onSort: (columnIndex, ascending) {
-                setState(() {
-                  sort = !sort;
-                });
-                onSortColum(columnIndex, ascending);
-              }),
-          DataColumn(
-            label: Text("Weapons", style: TextStyle(fontSize: 16)),
-            numeric: false,
-          ),
-        ],
-        rows: avengers
-            .map(
-              (avenger) => DataRow(
-              selected: selectedAvengers.contains(avenger),
-              cells: [
-                DataCell(
-                  Text(avenger.name),
-                  onTap: () {
-                    print('Selected ${avenger.name}');
-                  },
-                ),
-                DataCell(
-                  Text(avenger.weapon),
-                ),
-              ]),
-        )
-            .toList(),
+  Widget _header(){
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(top:30.0,bottom: 40.0),
+        child: Text('Detail Kontrak',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
       ),
     );
   }
 }
 
-
-class Avengers {
-  String name;
-  String weapon;
-
-  Avengers({this.name, this.weapon});
-
-  static List<Avengers> getAvengers() {
-    return <Avengers>[
-      Avengers(name: "Captain America", weapon: "Shield"),
-      Avengers(name: "Thor", weapon: "Mjolnir"),
-      Avengers(name: "Spiderman", weapon: "Web Shooters"),
-      Avengers(name: "Doctor Strange ", weapon: "Eye Of Agamotto"),
-    ];
-  }
-}
 
 class CardVendor extends StatefulWidget {
   final Kontrak kontrak;
@@ -165,8 +128,6 @@ class CardVendor extends StatefulWidget {
 class _CardVendorState extends State<CardVendor> {
   Kontrak _kontrak;
   double _widthPoint;
-  final TextStyle _txtStyleLabel = new TextStyle(color: Colors.grey);
-  final TextStyle _txtStyValue = new TextStyle(fontWeight: FontWeight.bold);
 
   @override
   void initState() {
@@ -179,41 +140,15 @@ class _CardVendorState extends State<CardVendor> {
   }
 
   @override
-  void disopose() {
+  void dispose() {
     super.dispose();
-  }
-
-  Widget _cellLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: Text(
-        text,
-        style: _txtStyleLabel,
-      ),
-    );
   }
 
   Widget _valueLabel(String textLabel, String textContent) {
     return TableCell(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _cellLabel(textLabel),
-        SizedBox(
-          height: 4,
-        ),
-        Container(
-            decoration: BoxDecoration(
-                //  color: Colors.red,
-//                    border: Border.all(color: Colors.black26),
-//                    borderRadius: BorderRadius.all(Radius.circular(8))
-                ),
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(
-              textContent,
-              style: _txtStyValue,
-            )),
-      ],
+        child: LabelDetailKontrakType1(
+      textLabel: textLabel,
+      textContent: textContent,
     ));
   }
 
@@ -262,8 +197,7 @@ class _CardVendorState extends State<CardVendor> {
       children: [
         TableRow(children: [
           _valueLabel('Pemenang:', _kontrak.nmVendor),
-          _valueLabel(
-              DataTableConstants.colNmPicVendor, _kontrak.nmPICVendor),
+          _valueLabel(DataTableConstants.colNmPicVendor, _kontrak.nmPICVendor),
           _valueLabel(
               DataTableConstants.colNoHpPicVendor, _kontrak.noHpPICVendor),
           _valueLabel(
@@ -288,8 +222,6 @@ class CardPICKontrak extends StatefulWidget {
 class _CardPICKontrakState extends State<CardPICKontrak> {
   Kontrak _kontrak;
   double _widthPoint;
-  final TextStyle _txtStyleLabel = new TextStyle(color: Colors.grey);
-  final TextStyle _txtStyValue = new TextStyle(fontWeight: FontWeight.bold);
 
   @override
   void initState() {
@@ -302,42 +234,16 @@ class _CardPICKontrakState extends State<CardPICKontrak> {
   }
 
   @override
-  void disopose() {
+  void dispose() {
     super.dispose();
-  }
-
-  Widget _cellLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: Text(
-        text,
-        style: _txtStyleLabel,
-      ),
-    );
   }
 
   Widget _valueLabel(String textLabel, String textContent) {
     return TableCell(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _cellLabel(textLabel),
-            SizedBox(
-              height: 4,
-            ),
-            Container(
-                decoration: BoxDecoration(
-                  //  color: Colors.red,
-//                    border: Border.all(color: Colors.black26),
-//                    borderRadius: BorderRadius.all(Radius.circular(8))
-                ),
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(
-                  textContent,
-                  style: _txtStyValue,
-                )),
-          ],
-        ));
+        child: LabelDetailKontrakType1(
+      textLabel: textLabel,
+      textContent: textContent,
+    ));
   }
 
   TableRow _forPadding(double height) {
@@ -363,8 +269,8 @@ class _CardPICKontrakState extends State<CardPICKontrak> {
   @override
   Widget build(BuildContext context) {
     double widthcol = widthCell;
-    if (_widthPoint * 6 < widthCell) {
-      widthcol = _widthPoint * 6;
+    if (_widthPoint * 5 < widthCell) {
+      widthcol = _widthPoint * 5;
     }
     return Table(
       columnWidths: {
@@ -404,8 +310,6 @@ class Table5column extends StatefulWidget {
 class _Table5columnState extends State<Table5column> {
   Kontrak _kontrak;
   double _widthPoint;
-  final TextStyle _txtStyleLabel = new TextStyle(color: Colors.grey);
-  final TextStyle _txtStyValue = new TextStyle(fontWeight: FontWeight.bold);
 
   @override
   void initState() {
@@ -418,41 +322,15 @@ class _Table5columnState extends State<Table5column> {
   }
 
   @override
-  void disopose() {
+  void dispose() {
     super.dispose();
-  }
-
-  Widget _cellLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: Text(
-        text,
-        style: _txtStyleLabel,
-      ),
-    );
   }
 
   Widget _valueLabel(String textLabel, String textContent) {
     return TableCell(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _cellLabel(textLabel),
-        SizedBox(
-          height: 4,
-        ),
-        Container(
-            decoration: BoxDecoration(
-                //  color: Colors.red,
-//                    border: Border.all(color: Colors.black26),
-//                    borderRadius: BorderRadius.all(Radius.circular(8))
-                ),
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(
-              textContent,
-              style: _txtStyValue,
-            )),
-      ],
+        child: LabelDetailKontrakType1(
+      textLabel: textLabel,
+      textContent: textContent,
     ));
   }
 
@@ -489,8 +367,8 @@ class _Table5columnState extends State<Table5column> {
   @override
   Widget build(BuildContext context) {
     double widthcol = widthCell;
-    if (_widthPoint * 6 < widthCell) {
-      widthcol = _widthPoint * 6;
+    if (_widthPoint * 5 < widthCell) {
+      widthcol = _widthPoint * 5;
     }
     return Table(
       columnWidths: {
@@ -512,7 +390,7 @@ class _Table5columnState extends State<Table5column> {
           _valueLabel(DataTableConstants.colDurasi, '${_kontrak.durasi}'),
           _valueLabel(DataTableConstants.colNilai, '${_kontrak.nilai}'),
         ]),
-        _forPadding(16.0),
+        _forPadding(30.0),
         TableRow(children: [
           _valueLabel(DataTableConstants.colDireksi, _kontrak.direksi),
           _valueLabel(
@@ -553,7 +431,7 @@ class _Table2columnState extends State<Table2column> {
   }
 
   @override
-  void disopose() {
+  void dispose() {
     super.dispose();
   }
 
@@ -576,7 +454,7 @@ class _Table2columnState extends State<Table2column> {
             border: Border.all(color: Colors.black26),
             borderRadius: BorderRadius.all(Radius.circular(8))),
         padding: const EdgeInsets.all(8.0),
-        child: Text(text),
+        child: SelectableText(text),
       ),
     ));
   }
@@ -584,13 +462,13 @@ class _Table2columnState extends State<Table2column> {
   @override
   Widget build(BuildContext context) {
     double widthcol1 = 130;
-    if (_widthPoint * 5 < 150) {
+    if (_widthPoint * 5 < 130) {
       widthcol1 = _widthPoint * 5;
     }
     return Table(
       columnWidths: {
         0: FixedColumnWidth(widthcol1),
-        1: FixedColumnWidth(_widthPoint * 14)
+        1: FixedColumnWidth(_widthPoint * 10)
       },
 //          defaultColumnWidth:
 //              FixedColumnWidth(MediaQuery.of(context).size.width / 3),
@@ -674,59 +552,46 @@ class _Table2columnState extends State<Table2column> {
   }
 }
 
-class Expansionpanel extends StatefulWidget {
-  Expansionpaneltate createState() => Expansionpaneltate();
-}
+class LabelDetailKontrakType1 extends StatelessWidget {
+  final String textContent;
+  final String textLabel;
 
-class NewItem {
-  bool isExpanded;
-  final String header;
-  final Widget body;
-  final Icon iconpic;
+  LabelDetailKontrakType1({this.textLabel, this.textContent});
 
-  NewItem(this.isExpanded, this.header, this.body, this.iconpic);
-}
+  final TextStyle _txtStyleLabel = const TextStyle(color: Colors.grey);
+  final TextStyle _txtStyValue = new TextStyle(fontWeight: FontWeight.bold);
 
-class Expansionpaneltate extends State<Expansionpanel> {
-  List<NewItem> items = <NewItem>[
-    NewItem(
-        false, // isExpanded ?
-        'Header', // header
-        Padding(
-            padding: EdgeInsets.all(20.0),
-            child: LogDocumentView()), // body
-        Icon(Icons.image) // iconPic
-        ),
-  ];
-
-  Widget build(BuildContext context) {
+  Widget _cellLabel(String text) {
     return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: ExpansionPanelList(
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() {
-            items[index].isExpanded = !items[index].isExpanded;
-          });
-        },
-        children: items.map((NewItem item) {
-          return ExpansionPanel(
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return ListTile(
-                  leading: item.iconpic,
-                  title: Text(
-                    item.header,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ));
-            },
-            isExpanded: item.isExpanded,
-            body: item.body,
-          );
-        }).toList(),
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Text(
+        text,
+        style: _txtStyleLabel,
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _cellLabel(textLabel),
+        SizedBox(
+          height: 4,
+        ),
+        Container(
+            decoration: BoxDecoration(
+                //  color: Colors.red,
+//                    border: Border.all(color: Colors.black26),
+//                    borderRadius: BorderRadius.all(Radius.circular(8))
+                ),
+            padding: const EdgeInsets.only(left: 8.0),
+            child: SelectableText(
+              textContent,
+              style: _txtStyValue,
+            )),
+      ],
     );
   }
 }
