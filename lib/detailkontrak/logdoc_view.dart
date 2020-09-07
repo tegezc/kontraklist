@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:listkontrakapp/detailkontrak/logdoceditor.dart';
+import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 
 class Expansionpanel extends StatefulWidget {
@@ -245,19 +247,45 @@ class _LogDokViewState extends State<LogDokView> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Table(
-        columnWidths: {
-          0: FixedColumnWidth(50.0),
-          1: FixedColumnWidth(300.0),
-          2: FixedColumnWidth(250.0),
-          3: FixedColumnWidth(150.0),
-          4: FixedColumnWidth(50),
-          5: FixedColumnWidth(150.0),
-        },
-        border: TableBorder.all(
-            color: Colors.black26, width: 1, style: BorderStyle.solid),
-        children: _setupContentTable(ldocument),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RaisedButton(
+            child: Text('Tambah Log Dokumen'),
+            color: Colors.cyan[600],
+            textColor: Colors.white,
+            onPressed: (){
+              _clickKontrakBaru();
+            },
+          ),
+          Table(
+            columnWidths: {
+              0: FixedColumnWidth(50.0),
+              1: FixedColumnWidth(300.0),
+              2: FixedColumnWidth(250.0),
+              3: FixedColumnWidth(150.0),
+              4: FixedColumnWidth(50),
+              5: FixedColumnWidth(150.0),
+            },
+            border: TableBorder.all(
+                color: Colors.black26, width: 1, style: BorderStyle.solid),
+            children: _setupContentTable(ldocument),
+          ),
+        ],
       ),
+    );
+  }
+
+  void _clickKontrakBaru() async {
+    await openPage(context, LogDocEditor());
+  }
+
+  Future openPage(context, Widget builder) async {
+    // wait until animation finished
+    await SwipeBackObserver.promise?.future;
+
+    return await Navigator.of(context).push(
+      MaterialPageRoute(builder: (ctx) => builder),
     );
   }
 }

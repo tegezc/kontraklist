@@ -6,3 +6,8 @@ enum EnumValidatorTextFieldForm{
   email,
   bebas,
 }
+
+enum EnumTypeDashboard{
+  hari90,hari180,hari360
+
+}

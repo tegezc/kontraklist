@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:listkontrakapp/enum_app.dart';
+import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/util/process_string.dart';
 
 class KontrakEditor extends StatefulWidget {
