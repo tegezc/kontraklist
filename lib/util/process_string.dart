@@ -58,7 +58,7 @@ class ProcessString {
   }
 
   /*
-  * ex: 23 Maret 2019
+  * return: 23 Maret 2019
   * */
   String dateToStringDdMmmmYyyy(DateTime dateTime) {
     String tanggal =
@@ -67,9 +67,10 @@ class ProcessString {
   }
 
   /*
-  * ex: 23 Mar 2019
+  * return: 23 Mar 2019
   * */
   String dateToStringDdMmmYyyyShort(DateTime dateTime) {
+
     String tanggal =
         '${dateTime.day < 10 ? '0' : ''}${dateTime.day} ${namaBulanPendek[dateTime.month]} ${dateTime.year}';
     return tanggal;
@@ -128,15 +129,15 @@ class ProcessString {
   }
 
   /*
-  * ex: 01-01-2019
+  * input ex: 2020-02-30
   * */
   DateTime dateFromTextToDateTime(String tanggal) {
     var tmp = tanggal.split('-');
     if (tmp.length == 3) {
       try {
-        int year = int.parse(tmp[2]);
+        int year = int.parse(tmp[0]);
         int month = int.parse(tmp[1]);
-        int day = int.parse(tmp[0]);
+        int day = int.parse(tmp[2]);
 
         return DateTime(year, month, day);
       } catch (e) {

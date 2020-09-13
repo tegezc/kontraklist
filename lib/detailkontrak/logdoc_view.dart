@@ -232,8 +232,8 @@ class _LogDokViewState extends State<LogDokView> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                OutlinedButton(onPressed: () {  }, child: Text('view PDF'),),
-                OutlinedButton(onPressed: () {  }, child: Text('view Doc'),),
+                OutlineButton(onPressed: () {  }, child: Text('view PDF'),),
+                OutlineButton(onPressed: () {  }, child: Text('view Doc'),),
               ],
             ),
           ),

@@ -48,18 +48,26 @@ class Kontrak {
 //      this._kontrakAwal);
 
   Kontrak.fromJson(Map<String, dynamic> json) {
-    DateTime dtmulai =
-        _processString.dateFromTextToDateTime(json[DataJSONCons.fieldTglMulai]);
-    DateTime dtberakhir = _processString
-        .dateFromTextToDateTime(json[DataJSONCons.fieldTglBerakhir]);
-    this.realID = json[DataJSONCons.fieldRealId];
+    DateTime dtmulai = json[DataJSONCons.fieldTglMulai] == null
+        ? null
+        : _processString
+            .dateFromTextToDateTime(json[DataJSONCons.fieldTglMulai]);
+    DateTime dtberakhir = json[DataJSONCons.fieldTglBerakhir] == null
+        ? null
+        : _processString
+            .dateFromTextToDateTime(json[DataJSONCons.fieldTglBerakhir]);
+    int realid = int.parse(json[DataJSONCons.fieldRealId]);
+    int nilai = json[DataJSONCons.fieldNilai]==null?0:int.parse(json[DataJSONCons.fieldNilai]);
+    int durasi = json[DataJSONCons.fieldDurasi]==null?0:int.parse(json[DataJSONCons.fieldDurasi]);
+
+    this.realID = realid;
     this._noKontrak = json[DataJSONCons.fieldNoKontrak];
     this._nama = json[DataJSONCons.fieldNmKontrak];
     this._namaUnit = json[DataJSONCons.fieldNmUnit];
     this._region = json[DataJSONCons.fieldRegion];
     this._stream = json[DataJSONCons.fieldStream];
-    this._durasi = json[DataJSONCons.fieldDurasi];
-    this._nilai = json[DataJSONCons.fieldNilai];
+    this._durasi = durasi;
+    this._nilai = nilai;
     this._tglMulai = dtmulai;
     this._tglBerakhir = dtberakhir;
     this._nmPICKontrak = json[DataJSONCons.fieldNmPicKontrak];
@@ -114,11 +122,13 @@ class Kontrak {
 
   String get kontrakAwal => _kontrakAwal;
 
-  String get strTglMulai =>
-      _processString.dateToStringDdMmmYyyyShort(_tglMulai);
+  String get strTglMulai{
+    return  _tglMulai==null?'':_processString.dateToStringDdMmmYyyyShort(_tglMulai);
+  }
 
-  String get strTglBerakhir =>
-      _processString.dateToStringDdMmmYyyyShort(_tglBerakhir);
+  String get strTglBerakhir {
+    return  _tglBerakhir==null?'':_processString.dateToStringDdMmmYyyyShort(_tglBerakhir);
+  }
 
   Map toJson() {
     return {
@@ -164,7 +174,7 @@ class LogDokumen {
       @required this.linkPdf,
       this.linkDoc});
 
-  String get strTanggal{
+  String get strTanggal {
     ProcessString processString = new ProcessString();
     return processString.dateToStringDdMmmmYyyy(tanggal);
   }
@@ -178,21 +188,24 @@ class LogDokumen {
         versi: 1,
         linkPdf: 'link ke pdf',
         linkDoc: 'linkkedoc',
-      ),  LogDokumen(
+      ),
+      LogDokumen(
         namaReviewer: "Captain America",
         keterangan: "Shield",
         tanggal: DateTime.now(),
         versi: 2,
         linkPdf: 'link ke pdf',
         linkDoc: 'linkkedoc',
-      ),  LogDokumen(
+      ),
+      LogDokumen(
         namaReviewer: "Captain America",
         keterangan: "Shield",
         tanggal: DateTime.now(),
         versi: 3,
         linkPdf: 'link ke pdf',
         linkDoc: 'linkkedoc',
-      ),  LogDokumen(
+      ),
+      LogDokumen(
         namaReviewer: "Captain America",
         keterangan: "Shield",
         tanggal: DateTime.now(),
