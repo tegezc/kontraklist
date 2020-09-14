@@ -115,7 +115,7 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   Widget build(BuildContext context) {
 //    MediaQueryData md = MediaQuery.of(context);
     if (_listKontrak == null) {
-      return LoadingNungguData();
+      return LoadingNunggu('Tunggu sebentar...');
     } else if (_listKontrak.isEmpty) {
       return BelumAdaData();
     } else {

@@ -1,4 +1,4 @@
-import 'dart:html';
+//import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -144,12 +144,12 @@ class _DashboardState extends State<Dashboard> {
                           EnumTypeDashboard.hari90, entryAllKontrak.lkontrak90)
                       : Container(),
                   entryAllKontrak.lKontrak180.isNotEmpty
-                      ? CardDashboard(
-                          EnumTypeDashboard.hari180, entryAllKontrak.lKontrak180)
+                      ? CardDashboard(EnumTypeDashboard.hari180,
+                          entryAllKontrak.lKontrak180)
                       : Container(),
                   entryAllKontrak.lKontrak360.isNotEmpty
-                      ? CardDashboard(
-                          EnumTypeDashboard.hari360, entryAllKontrak.lKontrak360)
+                      ? CardDashboard(EnumTypeDashboard.hari360,
+                          entryAllKontrak.lKontrak360)
                       : Container(),
                 ],
               ),
@@ -163,7 +163,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     if (_entryAllKontrak == null) {
-      return LoadingNungguData();
+      return LoadingNunggu('Sedang mengambil data...');
     } else {
       if (_entryAllKontrak.isHasData()) {
         return _scaffoldPage(_entryAllKontrak);
@@ -193,6 +193,7 @@ class _CardDashboardState extends State<CardDashboard> {
   );
   Color _color;
   String _textHeader;
+  int _page = 1;
 
   @override
   void initState() {
@@ -262,7 +263,7 @@ class _CardDashboardState extends State<CardDashboard> {
   }
 
   Widget _textContentJudul(String text, Kontrak kontrak) {
-    String tmpText = text==null?'':text;
+    String tmpText = text == null ? '' : text;
     return TableCell(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -272,7 +273,7 @@ class _CardDashboardState extends State<CardDashboard> {
   }
 
   Widget _textNoDanTanggal(String text, Kontrak kontrak) {
-    String tmpText = text==null?'':text;
+    String tmpText = text == null ? '' : text;
     return TableCell(
       verticalAlignment: TableCellVerticalAlignment.middle,
       child: InkWell(
@@ -286,61 +287,62 @@ class _CardDashboardState extends State<CardDashboard> {
   List<TableRow> _table(List<Kontrak> lk) {
     List<TableRow> lrow = new List();
     lrow.add(this._headerTable());
-    for (int i = 0; i < lk.length; i++) {
+    int estimateRowCount = _page*10;
+    int rowCount = estimateRowCount>lk.length?lk.length:estimateRowCount;
+    for (int i = 0; i < rowCount; i++) {
       lrow.add(this._contentTable(lk[i]));
     }
     return lrow;
   }
 
-  // List<Kontrak> _createDummyKontrak() {
-  //   List<Kontrak> lk = new List();
-  //   lk.add(new Kontrak(
-  //       'RR2015/12/20',
-  //       'Pengadaan komputer dan Printer divisi IT Pertamina',
-  //       DateTime(2019, 12, 20)));
-  //   lk.add(new Kontrak(
-  //       'RR2016/12/20',
-  //       'Pengadaan komputer dan Printer divisi IT Pertamina',
-  //       DateTime(2020, 12, 20)));
-  //   lk.add(new Kontrak(
-  //       'RR2016/12/20',
-  //       'Pengadaan komputer dan Printer divisi IT Pertamina',
-  //       DateTime(2021, 12, 20)));
-  //   lk.add(new Kontrak(
-  //       'RR2016/12/20',
-  //       'Pengadaan komputer dan Printer divisi IT Pertamina',
-  //       DateTime(2022, 12, 20)));
-  //   return lk;
-  // }
-
   Widget _cardKontrak(List<Kontrak> lkon, double width) {
+    bool ismorevisible = false;
+    if(lkon.length>_page*10){
+      ismorevisible = true;
+    }
     return Card(
-      child: Container(
-        width: width,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              color: _color,
-              height: 50,
-              width: width,
-              child: Center(
-                child: Text(
-                  _textHeader,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          width: width,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                color: _color,
+                height: 50,
+                width: width,
+                child: Center(
+                  child: Text(
+                    _textHeader,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
                 ),
               ),
-            ),
-            Table(
-              border: TableBorder.all(),
-              columnWidths: {
-                0: FlexColumnWidth(1),
-                1: FlexColumnWidth(2),
-                2: FlexColumnWidth(1),
-              },
-              children: this._table(lkon),
-            ),
-          ],
+              SizedBox(height: 5,),
+              Table(
+                border: TableBorder.symmetric(),
+                columnWidths: {
+                  0: FlexColumnWidth(1),
+                  1: FlexColumnWidth(2),
+                  2: FlexColumnWidth(1),
+                },
+                children: this._table(lkon),
+              ),
+              ismorevisible?SizedBox(
+                width: double.infinity,
+                child: RaisedButton(
+                  onPressed: () {
+
+                    setState(() {
+                      _page++;
+                    });
+                  },
+                  child: Text('more...'),
+                ),
+              ):Container(),
+            ],
+          ),
         ),
       ),
     );

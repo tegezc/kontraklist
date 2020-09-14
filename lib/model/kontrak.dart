@@ -216,3 +216,12 @@ class LogDokumen {
     ];
   }
 }
+
+class StreamKontrak{
+  String realId;
+  String nama;
+  StreamKontrak.fromJson(Map<String, dynamic> json){
+    this.realId = json[FieldJsonStream.fieldRealId];
+    this.nama = json[FieldJsonStream.fieldNama];
+  }
+}

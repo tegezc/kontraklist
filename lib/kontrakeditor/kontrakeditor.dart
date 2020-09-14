@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:listkontrakapp/kontrakeditor/bloc_kontrakeditor.dart';
+import 'package:listkontrakapp/kontrakeditor/search_kontrak.dart';
 import 'package:listkontrakapp/model/enum_app.dart';
+import 'package:listkontrakapp/model/kontrak.dart';
+import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 import 'package:listkontrakapp/util/process_string.dart';
 
 class KontrakEditor extends StatefulWidget {
@@ -13,33 +17,50 @@ class KontrakEditor extends StatefulWidget {
 
 class _KontrakEditorState extends State<KontrakEditor> {
   String _title;
+  BlocKontrakEditor _blocKontrakEditor;
 
   @override
   void initState() {
     _title = widget.enumStateEditor == EnumStateEditor.baru
         ? 'Kontrak Baru'
         : 'Edit Kontrak';
+    _blocKontrakEditor = new BlocKontrakEditor();
     super.initState();
+    _blocKontrakEditor.firstTime();
   }
+
+  _handleFinishSearch(int state) {}
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-//      appBar: AppBar(
-//        title:Text(_title),
-//        backgroundColor: Colors.cyan,
-//      ),
-      body: SingleChildScrollView(
-        child: KontrakEditorForm(_title),
-      ),
-    );
+    return StreamBuilder<ItemEditorKontrak>(
+        stream: _blocKontrakEditor.itemkontrakeditorStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            ItemEditorKontrak itemEditorKontrak = snapshot.data;
+            return Scaffold(
+              body: SingleChildScrollView(
+                child: Stack(children: <Widget>[
+                  KontrakEditorForm(_title, itemEditorKontrak),
+                  itemEditorKontrak.isModeSearch?Positioned.fill(child: SearchKontrak(_handleFinishSearch)):Container(),
+                ]),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return ErrorPage();
+          } else {
+            return LoadingNunggu(
+                'Harap menunggu, sedang mempersiapkan data...');
+          }
+        });
   }
 }
 
 class KontrakEditorForm extends StatefulWidget {
+  final ItemEditorKontrak itemEditorKontrak;
   final String title;
 
-  KontrakEditorForm(this.title);
+  KontrakEditorForm(this.title, this.itemEditorKontrak);
 
   @override
   _KontrakEditorFormState createState() => _KontrakEditorFormState();
@@ -64,7 +85,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
   final _penandaTanganKontrakTextController = TextEditingController();
 
   double _formProgress = 0;
-  List _streams = ["Stream1", "Stream2", "Stream3", "Stream4"];
+ // List _streams = ["Stream1", "Stream2", "Stream3", "Stream4"];
   List<DropdownMenuItem<String>> _dropDownStream;
   String _currentStream;
   DateTime _dtMulai;
@@ -100,8 +121,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     _dtMulai = DateTime.now();
     _dtBerakhir = DateTime.now();
     _processString = new ProcessString();
-    _dropDownStream = getDropDownMenuItems();
+    _dropDownStream = _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
     _currentStream = _dropDownStream[0].value;
+
     super.initState();
   }
 
@@ -139,11 +161,11 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
         maxLines: null,
         controller: controller,
         decoration: InputDecoration(
-            labelText: text,
-            labelStyle: TextStyle(
-              fontSize: 12,
-              color: Colors.blue,
-            ),
+          labelText: text,
+          labelStyle: TextStyle(
+            fontSize: 12,
+            color: Colors.blue,
+          ),
           border: const OutlineInputBorder(),
         ),
       ),
@@ -164,9 +186,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
             height: 8,
           ),
           OutlineButton(
-            onPressed:(){
+            onPressed: () {
               actionBtnClick();
-            },// actionBtnClick(),
+            }, // actionBtnClick(),
             child: Text(txtBtn),
           ),
         ],
@@ -339,10 +361,10 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     );
   }
 
-  List<DropdownMenuItem<String>> getDropDownMenuItems() {
+  List<DropdownMenuItem<String>> _getDropDownMenuItems(List<StreamKontrak> lstream) {
     List<DropdownMenuItem<String>> items = new List();
-    for (String stream in _streams) {
-      items.add(new DropdownMenuItem(value: stream, child: new Text(stream)));
+    for (StreamKontrak stream in lstream) {
+      items.add(new DropdownMenuItem(value: stream.realId, child: new Text(stream.nama)));
     }
     return items;
   }
@@ -353,6 +375,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     double width = mediaQueryData.size.width - 120;
     double widhtCardInternal = (width / 20) * 12;
     double widthPIC = (width / 20) * 8;
+
     return Padding(
       padding: const EdgeInsets.only(left: 60.0, right: 60.0),
       child: Form(
@@ -363,9 +386,12 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
           children: [
             LinearProgressIndicator(value: _formProgress),
             Container(
-              child: FlatButton.icon(onPressed: (){
-                Navigator.of(context).pop();
-              }, icon: Icon(Icons.keyboard_backspace), label: Text('Kemabli')),
+              child: FlatButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon: Icon(Icons.keyboard_backspace),
+                  label: Text('Kemabli')),
             ),
             Center(
               child: Padding(
@@ -389,7 +415,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                 )
               ],
             ),
-            SizedBox(height: 30,),
+            SizedBox(
+              height: 30,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -407,9 +435,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                 RaisedButton(
                   color: Colors.cyan[600],
                   textColor: Colors.white,
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   child: Text('Batal'),
                 ),
               ],

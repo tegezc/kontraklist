@@ -47,7 +47,23 @@ class HttpAction {
     if (response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      throw Exception('Failed to create album.');
+      throw Exception('Failed to createContract.');
+    }
+  }
+
+  Future<Map<String, dynamic>> initialCreateKontrak() async {
+    try{
+      String url = '$_host/kontraks';
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return null;
+      }
+    }catch(e){
+      print(e.toString());
+      return null;
     }
   }
 }
