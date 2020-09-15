@@ -26,10 +26,15 @@ class _KontrakEditorState extends State<KontrakEditor> {
         : 'Edit Kontrak';
     _blocKontrakEditor = new BlocKontrakEditor();
     super.initState();
-    _blocKontrakEditor.firstTime();
+    widget.enumStateEditor == EnumStateEditor.baru
+        ? _blocKontrakEditor.firstTimeNew()
+        : _blocKontrakEditor.firstTimeEdit();
   }
 
-  _handleFinishSearch(int state) {}
+  void dispose() {
+    _blocKontrakEditor.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +46,13 @@ class _KontrakEditorState extends State<KontrakEditor> {
             return Scaffold(
               body: SingleChildScrollView(
                 child: Stack(children: <Widget>[
-                  KontrakEditorForm(_title, itemEditorKontrak),
-                  itemEditorKontrak.isModeSearch?Positioned.fill(child: SearchKontrak(_handleFinishSearch)):Container(),
+                  KontrakEditorForm(_title, itemEditorKontrak,
+                      _blocKontrakEditor, widget.enumStateEditor),
+                  itemEditorKontrak.isModeSearch
+                      ? Positioned.fill(
+                          child: SearchKontrak(
+                              _blocKontrakEditor, itemEditorKontrak))
+                      : Container(),
                 ]),
               ),
             );
@@ -59,8 +69,11 @@ class _KontrakEditorState extends State<KontrakEditor> {
 class KontrakEditorForm extends StatefulWidget {
   final ItemEditorKontrak itemEditorKontrak;
   final String title;
+  final BlocKontrakEditor blocKontrakEditor;
+  final EnumStateEditor enumStateEditor;
 
-  KontrakEditorForm(this.title, this.itemEditorKontrak);
+  KontrakEditorForm(this.title, this.itemEditorKontrak, this.blocKontrakEditor,
+      this.enumStateEditor);
 
   @override
   _KontrakEditorFormState createState() => _KontrakEditorFormState();
@@ -85,7 +98,6 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
   final _penandaTanganKontrakTextController = TextEditingController();
 
   double _formProgress = 0;
- // List _streams = ["Stream1", "Stream2", "Stream3", "Stream4"];
   List<DropdownMenuItem<String>> _dropDownStream;
   String _currentStream;
   DateTime _dtMulai;
@@ -118,45 +130,104 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
 
   @override
   void initState() {
-    _dtMulai = DateTime.now();
-    _dtBerakhir = DateTime.now();
-    _processString = new ProcessString();
-    _dropDownStream = _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
-    _currentStream = _dropDownStream[0].value;
-
+    if (widget.enumStateEditor == EnumStateEditor.baru) {
+      this._initBaru();
+    } else {
+      this._initEditmode();
+    }
     super.initState();
   }
 
+  void _initEditmode() {}
+
+  void _initBaru() {
+    _processString = new ProcessString();
+    _dropDownStream =
+        _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
+    _currentStream = _dropDownStream[0].value;
+  }
+
   Widget _shortField(String text, EnumValidatorTextFieldForm enumValidat,
-      TextEditingController controller) {
+      EnumFieldState enumFieldState, TextEditingController controller) {
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: TextFormField(
         autovalidate: _autoValidate,
         validator: (value) {
-          switch (enumValidat) {
-            case EnumValidatorTextFieldForm.email:
-              {
-                return _validatorEmail(value);
+          if (_noKontrakTextController.text.length > 0) {
+            // Existing
+
+            if (text.length == 0) {
+              return '*Field tidak boleh kosong.';
+            } else {
+              switch (enumValidat) {
+                case EnumValidatorTextFieldForm.email:
+                  {
+                    return _validatorEmail(value);
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.onlynumber:
+                  {
+                    return _validatorMustNumber(value);
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.bebas:
+                  {
+                    return null;
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.onlyText:
+                  {
+                    return _validatorOnlyText(value);
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.phoneNumber:
+                  {
+                    return this._validatorPhoneNumber(value);
+                  }
+                  break;
               }
-              break;
-            case EnumValidatorTextFieldForm.noEmpty:
-              {
-                return _validatorNoEmpty(value);
+              return null;
+            }
+          } else {
+            // Baru
+            if (enumFieldState == EnumFieldState.baru) {
+              if (value.length == 0) {
+                return 'Field tidak boleh kosong.';
               }
-              break;
-            case EnumValidatorTextFieldForm.onlynumber:
-              {
-                return _validatorMustNumber(value);
+            }
+            if (value.length > 0) {
+              switch (enumValidat) {
+                case EnumValidatorTextFieldForm.email:
+                  {
+                    return _validatorEmail(value);
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.onlyText:
+                  {
+                    return _validatorOnlyText(value);
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.onlynumber:
+                  {
+                    return _validatorMustNumber(value);
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.bebas:
+                  {
+                    return null;
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.phoneNumber:
+                  {
+                    return this._validatorPhoneNumber(value);
+                  }
+                  break;
               }
-              break;
-            case EnumValidatorTextFieldForm.bebas:
-              {
-                return null;
-              }
-              break;
+            }
+
+            return null;
           }
-          return null;
         },
         maxLines: null,
         controller: controller,
@@ -232,10 +303,16 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     );
   }
 
-  Widget _cardInternalPerusahaan(double width) {
-    String txtMulai = _processString.dateToStringDdMmmYyyyShort(_dtMulai);
-    String txtBerakhir = _processString.dateToStringDdMmmYyyyShort(_dtBerakhir);
+  Widget _cardInternalPerusahaan(double width, Kontrak kontrakawal) {
+    String txtMulai = _dtMulai == null
+        ? 'Belum ditentkan'
+        : _processString.dateToStringDdMmmYyyyShort(_dtMulai);
+    String txtBerakhir = _dtBerakhir == null
+        ? 'Belum ditentukan'
+        : _processString.dateToStringDdMmmYyyyShort(_dtBerakhir);
     double w = width / 20;
+    String strkontrakawal =
+        kontrakawal == null ? 'Buat link' : kontrakawal.noKontrak;
     return Container(
       width: width,
       child: Card(
@@ -243,13 +320,13 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _shortField('Nomor Kontrak:', EnumValidatorTextFieldForm.bebas,
-                _noKontrakTextController),
-            _shortField('Nama Kontrak:', EnumValidatorTextFieldForm.noEmpty,
-                _namaKontrakTextController),
+                EnumFieldState.edit, _noKontrakTextController),
+            _shortField('Nama Kontrak:', EnumValidatorTextFieldForm.bebas,
+                EnumFieldState.baru, _namaKontrakTextController),
             _shortField('Nama Unit / AP:', EnumValidatorTextFieldForm.bebas,
-                _unitTextController),
+                EnumFieldState.baru, _unitTextController),
             _shortField('Anak Perusahaan:', EnumValidatorTextFieldForm.bebas,
-                _anakPerusahaanTextController),
+                EnumFieldState.baru, _anakPerusahaanTextController),
             Wrap(
               direction: Axis.horizontal,
 //              alignment: WrapAlignment.start,
@@ -260,6 +337,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                     child: _shortField(
                         'Durasi (Bulan):',
                         EnumValidatorTextFieldForm.onlynumber,
+                        EnumFieldState.baru,
                         _durasiTextController)),
                 SizedBox(
                   width: 10,
@@ -269,6 +347,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                     child: _shortField(
                         'Region:',
                         EnumValidatorTextFieldForm.bebas,
+                        EnumFieldState.baru,
                         _regionTextController)),
                 Padding(
                   padding:
@@ -289,12 +368,13 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
               ],
             ),
             _shortField('Nilai Kontrak:', EnumValidatorTextFieldForm.onlynumber,
-                _nilaiKontrakTextController),
+                EnumFieldState.edit, _nilaiKontrakTextController),
             _shortField('Direksi Pekerjaan:', EnumValidatorTextFieldForm.bebas,
-                _direksiPekerjaanTextController),
+                EnumFieldState.edit, _direksiPekerjaanTextController),
             _shortField(
                 'Penanda Tangan Kontrak:',
                 EnumValidatorTextFieldForm.bebas,
+                EnumFieldState.edit,
                 _penandaTanganKontrakTextController),
             Wrap(
               direction: Axis.horizontal,
@@ -309,7 +389,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                 }),
                 _widgetLabelAndButtonVerWithTooltip(
                     'Kontrak Awal ',
-                    'Buat link',
+                    strkontrakawal,
                     'Jika kontrak termasuk amandemen,\nsebaiknya buat link ke kontrak awal.',
                     w * 7,
                     _actionLinkKontrakKlik),
@@ -327,12 +407,18 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
       child: Card(
         child: Column(
           children: [
-            _shortField('Nama PIC Kontrak:', EnumValidatorTextFieldForm.bebas,
+            _shortField(
+                'Nama PIC Kontrak:',
+                EnumValidatorTextFieldForm.onlyText,
+                EnumFieldState.edit,
                 _nmPicKontrakTextController),
-            _shortField('No HP PIC Kontrak:', EnumValidatorTextFieldForm.bebas,
+            _shortField(
+                'No HP PIC Kontrak:',
+                EnumValidatorTextFieldForm.phoneNumber,
+                EnumFieldState.edit,
                 _noHpPicKontrakTextController),
-            _shortField('Email PIC Kontrak:', EnumValidatorTextFieldForm.bebas,
-                _emailPicKontrakTextController),
+            _shortField('Email PIC Kontrak:', EnumValidatorTextFieldForm.email,
+                EnumFieldState.edit, _emailPicKontrakTextController),
           ],
         ),
       ),
@@ -348,23 +434,40 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
             _shortField(
                 'Nama Vendor Pemenang:',
                 EnumValidatorTextFieldForm.bebas,
+                EnumFieldState.edit,
                 _nmVendorPemenangTextController),
-            _shortField('Nama PIC Vendor:', EnumValidatorTextFieldForm.bebas,
-                _nmPicVendorTextController),
-            _shortField('No HP PIC Vendor:', EnumValidatorTextFieldForm.bebas,
+            _shortField('Nama PIC Vendor:', EnumValidatorTextFieldForm.onlyText,
+                EnumFieldState.edit, _nmPicVendorTextController),
+            _shortField(
+                'No HP PIC Vendor:',
+                EnumValidatorTextFieldForm.phoneNumber,
+                EnumFieldState.edit,
                 _noHpPicVendorTextController),
-            _shortField('Email PIC Vendor:', EnumValidatorTextFieldForm.bebas,
-                _emailPicVendorTextController),
+            _shortField('Email PIC Vendor:', EnumValidatorTextFieldForm.email,
+                EnumFieldState.edit, _emailPicVendorTextController),
           ],
         ),
       ),
     );
   }
 
-  List<DropdownMenuItem<String>> _getDropDownMenuItems(List<StreamKontrak> lstream) {
+  List<DropdownMenuItem<String>> _getDropDownMenuItems(
+      List<StreamKontrak> lstream) {
     List<DropdownMenuItem<String>> items = new List();
+    StreamKontrak sk = new StreamKontrak('000', 'Pilih Stream');
+    items.add(new DropdownMenuItem(
+        value: sk.realId,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: new Text(sk.nama),
+        )));
     for (StreamKontrak stream in lstream) {
-      items.add(new DropdownMenuItem(value: stream.realId, child: new Text(stream.nama)));
+      items.add(new DropdownMenuItem(
+          value: stream.realId,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new Text(stream.nama),
+          )));
     }
     return items;
   }
@@ -375,7 +478,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     double width = mediaQueryData.size.width - 120;
     double widhtCardInternal = (width / 20) * 12;
     double widthPIC = (width / 20) * 8;
-
+    String strbuttonsubmit = widget.enumStateEditor==EnumStateEditor.baru?'Simpan':'Edit';
     return Padding(
       padding: const EdgeInsets.only(left: 60.0, right: 60.0),
       child: Form(
@@ -391,7 +494,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                     Navigator.of(context).pop();
                   },
                   icon: Icon(Icons.keyboard_backspace),
-                  label: Text('Kemabli')),
+                  label: Text('Kembali')),
             ),
             Center(
               child: Padding(
@@ -403,7 +506,8 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
             Wrap(
               direction: Axis.horizontal,
               children: [
-                _cardInternalPerusahaan(widhtCardInternal),
+                _cardInternalPerusahaan(
+                    widhtCardInternal, widget.itemEditorKontrak.kontrakAwal),
                 Column(
                   children: [
                     _cardPICKontrak(widthPIC),
@@ -427,7 +531,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                   onPressed: () {
                     _validateInputs();
                   },
-                  child: Text('Simpan'),
+                  child: Text(strbuttonsubmit),
                 ),
                 SizedBox(
                   width: 50.0,
@@ -435,7 +539,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                 RaisedButton(
                   color: Colors.cyan[600],
                   textColor: Colors.white,
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                   child: Text('Batal'),
                 ),
               ],
@@ -477,42 +583,56 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     }
   }
 
+  /// value tidak boleh null / kosong
   String _validatorEmail(value) {
-    if (value.isEmpty) {
-      return 'Tidak boleh kosong.';
+    bool emailValid = RegExp(
+            r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+        .hasMatch(value);
+    if (emailValid) {
+      return null;
     } else {
-      bool emailValid = RegExp(
-              r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-          .hasMatch(value);
-      if (emailValid) {
+      return 'Email tidak valid.';
+    }
+  }
+
+  /// value tidak boleh null / kosong
+  String _validatorMustNumber(String value) {
+    int val = int.tryParse(value);
+    if (val == null) {
+      return '* Harus berupa angka positif.';
+    } else {
+      if (val < 0) {
+        return '* Harus berupa angka positif.';
+      }
+    }
+
+    return null;
+  }
+
+  /// value tidak boleh null / kosong
+  String _validatorOnlyText(String value) {
+    bool emailValid = RegExp(r"^[a-zA-Z ]*$").hasMatch(value);
+    if (emailValid) {
+      return null;
+    } else {
+      return 'Harus text';
+    }
+  }
+
+  /// value tidak boleh null / kosong
+  String _validatorPhoneNumber(String value) {
+    if (value.length <= 15) {
+      bool phoneNumberValid =
+          RegExp(r"^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$")
+              .hasMatch(value);
+      if (phoneNumberValid) {
         return null;
       } else {
-        return 'Email tidak valid.';
+        return 'Nomor kontak tidak valid.';
       }
-    }
-  }
-
-  String _validatorNoEmpty(String value) {
-    if (value.isEmpty) {
-      return 'Field tidak boleh kosong.';
-    }
-    return null;
-  }
-
-  String _validatorMustNumber(String value) {
-    if (value.isEmpty) {
-      return 'Field tidak boleh kosong.';
     } else {
-      int val = int.tryParse(value);
-      if (val == null) {
-        return '* Harus berupa angka positif.';
-      } else {
-        if (val < 0) {
-          return '* Harus berupa angka positif.';
-        }
-      }
+      return 'Nomor kontak tidak valid.';
     }
-    return null;
   }
 
   void _actionBtnTglAwalKlik(BuildContext context) {
@@ -523,7 +643,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     _selectDate(context, false);
   }
 
-  void _actionLinkKontrakKlik() {}
+  void _actionLinkKontrakKlik() {
+    widget.blocKontrakEditor.showSearch();
+  }
 
   void _validateInputs() {
     if (_formKey.currentState.validate()) {

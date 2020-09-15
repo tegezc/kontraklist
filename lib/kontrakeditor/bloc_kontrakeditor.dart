@@ -6,6 +6,7 @@ import 'package:listkontrakapp/http/http_controller.dart';
 class BlocKontrakEditor {
   List<Kontrak> _cacheListKontrak;
   List<StreamKontrak> _cacheStream;
+  Kontrak  _cacheKontrak;
 
   BlocKontrakEditor() {
     _cacheListKontrak = List();
@@ -14,20 +15,13 @@ class BlocKontrakEditor {
 
   final PublishSubject<ItemEditorKontrak> _itemkontrakeditor =
       PublishSubject<ItemEditorKontrak>();
-
-  final PublishSubject<List<Kontrak>> _listKontrak =
-      PublishSubject<List<Kontrak>>();
-
+  
   Sink<ItemEditorKontrak> get itemkontrakeditorSink => _itemkontrakeditor.sink;
 
   Stream<ItemEditorKontrak> get itemkontrakeditorStream =>
       _itemkontrakeditor.stream;
-
-  Sink<List<Kontrak>> get listKontrakSink => _listKontrak.sink;
-
-  Stream<List<Kontrak>> get listKontrakStream => _listKontrak.stream;
-
-  void firstTime() async {
+  
+  void firstTimeNew() async {
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response = await httpAction.initialCreateKontrak();
     if (response != null) {
@@ -44,32 +38,48 @@ class BlocKontrakEditor {
         _cacheStream.add(stream);
       });
 
-      ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(_cacheStream, EStateKontrakEditor.finish, null, false);
+      ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
+          _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false);
       this.itemkontrakeditorSink.add(itemEditorKontrak);
     }
   }
 
-  void searchKontrak(String text) {
-    List<Kontrak> lk = _cacheListKontrak
-        .where((kontrak) =>
-            kontrak.noKontrak.toLowerCase().contains(text.toLowerCase()))
-        .toList();
-    listKontrakSink.add(lk);
+  void firstTimeEdit(){}
+
+  void showSearch() {
+    ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, true);
+    this.itemkontrakeditorSink.add(itemEditorKontrak);
+
+  }
+
+  void finishSearch(Kontrak kontrak) {
+    _cacheKontrak = kontrak;
+    ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false);
+    this.itemkontrakeditorSink.add(itemEditorKontrak);
+  }
+
+  void closeSearch() {
+    ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false);
+    this.itemkontrakeditorSink.add(itemEditorKontrak);
   }
 
   void dispose() {
-    _listKontrak.close();
     _itemkontrakeditor.close();
   }
 }
 
 class ItemEditorKontrak {
   List<StreamKontrak> listStream;
+  List<Kontrak> listKontrak;
   EStateKontrakEditor eStateKontrakEditor;
   Kontrak kontrakAwal;
   bool isModeSearch;
 
-  ItemEditorKontrak(this.listStream,this.eStateKontrakEditor,this.kontrakAwal,this.isModeSearch);
+  ItemEditorKontrak(this.listStream, this.listKontrak,this.eStateKontrakEditor, this.kontrakAwal,
+      this.isModeSearch);
 }
 
 enum EStateKontrakEditor { loading, finish }

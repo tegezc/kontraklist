@@ -89,7 +89,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
                     return null;
                   }
                   break;
-                case EnumValidatorTextFieldForm.noEmpty:
+                case EnumValidatorTextFieldForm.phoneNumber:
                   {
                     return _validatorNoEmpty(value);
                   }
@@ -100,6 +100,11 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
                   }
                   break;
                 case EnumValidatorTextFieldForm.bebas:
+                  {
+                    return null;
+                  }
+                  break;
+                case EnumValidatorTextFieldForm.onlyText:
                   {
                     return null;
                   }
@@ -216,7 +221,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
           children: [
             _shortField('Keterangan', 5, EnumValidatorTextFieldForm.bebas,
                 _noKontrakTextController),
-            _shortField('Nama Reviewer', 1, EnumValidatorTextFieldForm.noEmpty,
+            _shortField('Nama Reviewer', 1, EnumValidatorTextFieldForm.bebas,
                 _namaKontrakTextController),
             _widgetLabelTextForm('Versi ( Angka otomatis, tidak dapat di rubah )',_versiController,2),
             SizedBox(height: 8,),
@@ -255,7 +260,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
                     Navigator.of(context).pop();
                   },
                   icon: Icon(Icons.keyboard_backspace),
-                  label: Text('Kemabli')),
+                  label: Text('Kembali')),
             ),
             Center(
               child: Padding(
@@ -326,8 +331,6 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   void _actionBtnTglAkhirKlik(BuildContext context) {
     _selectDate(context, false);
   }
-
-  void _actionLinkKontrakKlik() {}
 
   void _validateInputs() {
     if (_formKey.currentState.validate()) {

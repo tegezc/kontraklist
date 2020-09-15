@@ -56,7 +56,7 @@ class _DetailKontrakState extends State<DetailKontrak> {
                             Navigator.of(context).pop();
                           },
                           icon: Icon(Icons.keyboard_backspace),
-                          label: Text('Kemabli')),
+                          label: Text('Kembali')),
                     ),
                     Spacer(),
                   ],

@@ -133,7 +133,7 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
                       Navigator.of(context).pop();
                     },
                     icon: Icon(Icons.keyboard_backspace),
-                    label: Text('Kemabli')),
+                    label: Text('Kembali')),
               ),
               Padding(
                 padding: const EdgeInsets.only(

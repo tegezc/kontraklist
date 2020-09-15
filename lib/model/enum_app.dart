@@ -2,9 +2,15 @@ enum EnumStateEditor { edit, baru }
 
 enum EnumValidatorTextFieldForm{
   onlynumber,
-  noEmpty,
+  onlyText,
+  phoneNumber,
   email,
   bebas,
+}
+
+enum EnumFieldState{
+  baru,
+  edit
 }
 
 enum EnumTypeDashboard{
