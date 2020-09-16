@@ -9,8 +9,8 @@ enum EnumValidatorTextFieldForm{
 }
 
 enum EnumFieldState{
-  baru,
-  edit
+  draft,
+  existing
 }
 
 enum EnumTypeDashboard{

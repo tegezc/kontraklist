@@ -7,6 +7,7 @@ class Kontrak {
   String _noKontrak;
   String _nama;
   String _namaUnit;
+  String _anakPerusahaan;
   String _region;
   String _stream;
   int _durasi;
@@ -23,6 +24,8 @@ class Kontrak {
   String _direksi;
   String _penandatangan;
   String _kontrakAwal;
+
+  Kontrak.kosong();
 
   Kontrak(this._noKontrak, this._nama, this._tglBerakhir);
 
@@ -57,13 +60,18 @@ class Kontrak {
         : _processString
             .dateFromTextToDateTime(json[DataJSONCons.fieldTglBerakhir]);
     int realid = int.parse(json[DataJSONCons.fieldRealId]);
-    int nilai = json[DataJSONCons.fieldNilai]==null?0:int.parse(json[DataJSONCons.fieldNilai]);
-    int durasi = json[DataJSONCons.fieldDurasi]==null?0:int.parse(json[DataJSONCons.fieldDurasi]);
+    int nilai = json[DataJSONCons.fieldNilai] == null
+        ? 0
+        : int.parse(json[DataJSONCons.fieldNilai]);
+    int durasi = json[DataJSONCons.fieldDurasi] == null
+        ? 0
+        : int.parse(json[DataJSONCons.fieldDurasi]);
 
     this.realID = realid;
     this._noKontrak = json[DataJSONCons.fieldNoKontrak];
     this._nama = json[DataJSONCons.fieldNmKontrak];
     this._namaUnit = json[DataJSONCons.fieldNmUnit];
+    this._anakPerusahaan = json[DataJSONCons.fieldAnakperusahaan];
     this._region = json[DataJSONCons.fieldRegion];
     this._stream = json[DataJSONCons.fieldStream];
     this._durasi = durasi;
@@ -89,6 +97,8 @@ class Kontrak {
   String get nama => _nama;
 
   String get namaUnit => _namaUnit;
+
+  String get anakPerusahaan => _anakPerusahaan;
 
   String get region => _region;
 
@@ -122,12 +132,112 @@ class Kontrak {
 
   String get kontrakAwal => _kontrakAwal;
 
-  String get strTglMulai{
-    return  _tglMulai==null?'':_processString.dateToStringDdMmmYyyyShort(_tglMulai);
+  void setnoKontrak(String value) {
+    _noKontrak = value;
+  }
+
+  void setnama(String value) {
+    _nama = value;
+  }
+
+  void setnamaUnit(String value) {
+    _namaUnit = value;
+  }
+
+  void setanakPerusahaan(String value) {
+    _anakPerusahaan = value;
+  }
+
+  void setregion(String value) {
+    _region = value;
+  }
+
+  void setstream(String value) {
+    _stream = value;
+  }
+
+  void setdurasiString(String value) {
+    try {
+      _durasi = int.parse(value);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  void setnilaiString(String value) {
+    try {
+      _nilai = int.parse(value);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  void setdurasi(int value) {
+    _durasi = value;
+  }
+
+  void setnilai(int value) {
+    _nilai = value;
+  }
+
+  void settglMulai(DateTime value) {
+    _tglMulai = value;
+  }
+
+  void settglBerakhir(DateTime value) {
+    _tglBerakhir = value;
+  }
+
+  void setnmPICKontrak(String value) {
+    _nmPICKontrak = value;
+  }
+
+  void setnoHpPICKontrak(String value) {
+    _noHpPICKontrak = value;
+  }
+
+  void setemailPICKontrak(String value) {
+    _emailPICKontrak = value;
+  }
+
+  void setnmVendor(String value) {
+    _nmVendor = value;
+  }
+
+  void setnmPICVendor(String value) {
+    _nmPICVendor = value;
+  }
+
+  void setnoHpPICVendor(String value) {
+    _noHpPICVendor = value;
+  }
+
+  void setemailPICVendor(String value) {
+    _emailPICVendor = value;
+  }
+
+  void setdireksi(String value) {
+    _direksi = value;
+  }
+
+  void setpenandatangan(String value) {
+    _penandatangan = value;
+  }
+
+  void setkontrakAwal(String value) {
+    _kontrakAwal = value;
+  }
+
+  String get strTglMulai {
+    return _tglMulai == null
+        ? ''
+        : _processString.dateToStringDdMmmYyyyShort(_tglMulai);
   }
 
   String get strTglBerakhir {
-    return  _tglBerakhir==null?'':_processString.dateToStringDdMmmYyyyShort(_tglBerakhir);
+    return _tglBerakhir == null
+        ? ''
+        : _processString.dateToStringDdMmmYyyyShort(_tglBerakhir);
   }
 
   Map toJson() {
@@ -136,6 +246,7 @@ class Kontrak {
       DataJSONCons.fieldNoKontrak: _noKontrak,
       DataJSONCons.fieldNmKontrak: _nama,
       DataJSONCons.fieldNmUnit: _namaUnit,
+      DataJSONCons.fieldAnakperusahaan: _anakPerusahaan,
       DataJSONCons.fieldRegion: _region,
       DataJSONCons.fieldStream: _stream,
       DataJSONCons.fieldDurasi: _durasi,
@@ -155,6 +266,12 @@ class Kontrak {
       DataJSONCons.fieldPenandatangan: _penandatangan,
       DataJSONCons.fieldKontrakAwal: _kontrakAwal
     };
+  }
+
+  String toString() {
+    return '$_noKontrak|$_nama|$_namaUnit|$_anakPerusahaan|$_region|$_durasi|$_nilai|$_stream'
+        '|$_tglMulai|$_tglBerakhir|$_nmPICKontrak|$_noHpPICKontrak|$_emailPICKontrak|$_nmVendor'
+        '|$_nmPICVendor|$_noHpPICVendor|$_emailPICVendor|$_direksi|$_penandatangan|$_kontrakAwal';
   }
 }
 
@@ -217,13 +334,13 @@ class LogDokumen {
   }
 }
 
-class StreamKontrak{
+class StreamKontrak {
   String realId;
   String nama;
 
-  StreamKontrak(this.realId,this.nama);
+  StreamKontrak(this.realId, this.nama);
 
-  StreamKontrak.fromJson(Map<String, dynamic> json){
+  StreamKontrak.fromJson(Map<String, dynamic> json) {
     this.realId = json[FieldJsonStream.fieldRealId];
     this.nama = json[FieldJsonStream.fieldNama];
   }

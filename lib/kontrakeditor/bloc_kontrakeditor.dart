@@ -39,16 +39,31 @@ class BlocKontrakEditor {
       });
 
       ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
-          _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false);
+          _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,false);
       this.itemkontrakeditorSink.add(itemEditorKontrak);
     }
   }
 
   void firstTimeEdit(){}
 
+  Future<bool> saveKontrak(Kontrak kontrak)async{
+    ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Mohon tunggu, sedang menyimpan data.');
+    this.itemkontrakeditorSink.add(itemEditorKontrak);
+    HttpAction httpAction = new HttpAction();
+    Map<String, dynamic> response = await httpAction.createKontrak(kontrak);
+    if(response['id']!=null){
+      return true;
+    }
+    ItemEditorKontrak itemEditorKontrak1 = new ItemEditorKontrak(
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Terjadi kesalahan saat menyimpan data.');
+    this.itemkontrakeditorSink.add(itemEditorKontrak1);
+    return false;
+  }
+
   void showSearch() {
     ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
-        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, true);
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, true,false);
     this.itemkontrakeditorSink.add(itemEditorKontrak);
 
   }
@@ -56,13 +71,13 @@ class BlocKontrakEditor {
   void finishSearch(Kontrak kontrak) {
     _cacheKontrak = kontrak;
     ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
-        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false);
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,false);
     this.itemkontrakeditorSink.add(itemEditorKontrak);
   }
 
   void closeSearch() {
     ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
-        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false);
+        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,false);
     this.itemkontrakeditorSink.add(itemEditorKontrak);
   }
 
@@ -77,9 +92,11 @@ class ItemEditorKontrak {
   EStateKontrakEditor eStateKontrakEditor;
   Kontrak kontrakAwal;
   bool isModeSearch;
+  bool isMenyimpan;
+  String textLoading;
 
   ItemEditorKontrak(this.listStream, this.listKontrak,this.eStateKontrakEditor, this.kontrakAwal,
-      this.isModeSearch);
+      this.isModeSearch,this.isMenyimpan,{this.textLoading});
 }
 
 enum EStateKontrakEditor { loading, finish }

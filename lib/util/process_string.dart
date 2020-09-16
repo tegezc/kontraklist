@@ -49,11 +49,11 @@ class ProcessString {
   }
 
   /*
-  * ex: 01-03-2019
+  * ex: 2020-03-30
   * */
   String dateToStringDdMmYyyy(DateTime dateTime) {
     String tanggal =
-        '${dateTime.day < 10 ? '0' : ''}${dateTime.day}-${dateTime.month < 10 ? '0' : ''}${dateTime.month}-${dateTime.year}';
+        '${dateTime.year}-${dateTime.month < 10 ? '0' : ''}${dateTime.month}-${dateTime.day < 10 ? '0' : ''}${dateTime.day}';
     return tanggal;
   }
 

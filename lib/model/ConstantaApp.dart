@@ -35,6 +35,7 @@ class DataJSONCons{
   static const String fieldNoKontrak = 'nokontrak';
   static const String fieldNmKontrak = 'nama';
   static const String fieldNmUnit = 'namaunit';
+  static const String fieldAnakperusahaan = 'anakperusahaan';
   static const String fieldRegion = 'region';
   static const String fieldStream = 'stream';
   static const String fieldDurasi = 'durasi';

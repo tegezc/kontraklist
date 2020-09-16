@@ -43,3 +43,31 @@ class ErrorPage extends StatelessWidget {
         body: Center(child: Text('Terjadi Kesalahan')));
   }
 }
+
+class LoadingMenyimpan extends StatelessWidget {
+  final String contentText;
+  LoadingMenyimpan(this.contentText);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black.withOpacity(0.5),
+      child: Center(child: Card(
+        child: FractionallySizedBox(
+          heightFactor: 0.2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              LoadingBouncingLine.circle(backgroundColor: Colors.deepOrange),
+              Padding(
+                padding: const EdgeInsets.only(left:30.0,right: 30.0),
+                child: Text(contentText, style: TextStyle(fontSize: 14,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      ),),
+    );
+  }
+}
