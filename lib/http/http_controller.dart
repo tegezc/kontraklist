@@ -7,31 +7,29 @@ class HttpAction {
   static const String keyHost = 'host';
   String _host;
 
-  HttpAction(){
+  HttpAction() {
     _host = 'http://localhost/project';
   }
 
   Future<Map<String, dynamic>> getDashboardData() async {
-
-    try{
-     // print(_host);
+    try {
+      // print(_host);
       final response = await http.get(_host);
       //print('masuk sini');
       if (response.statusCode == 200) {
         //print('masuk sini1');
         // If the server did return a 200 OK response,
         // then parse the JSON.
-       // print(response.body);
+        // print(response.body);
         return json.decode(response.body);
       } else {
-       // print('masuk sini2');
+        // print('masuk sini2');
         return null;
       }
-    }catch(e){
+    } catch (e) {
       print(e.toString());
       return null;
     }
-
   }
 
   Future<Map<String, dynamic>> createKontrak(Kontrak kontrak) async {
@@ -54,7 +52,7 @@ class HttpAction {
   }
 
   Future<Map<String, dynamic>> initialCreateKontrak() async {
-    try{
+    try {
       String url = '$_host/kontraks';
       final response = await http.get(url);
 
@@ -63,9 +61,21 @@ class HttpAction {
       } else {
         return null;
       }
-    }catch(e){
+    } catch (e) {
       print(e.toString());
       return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllKontrak() async {
+    String url = '$_host/kontraks';
+    final http.Response response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      print(response.body);
+      throw Exception('Failed get all kontrak');
     }
   }
 }

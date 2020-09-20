@@ -154,7 +154,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     _dropDownStream =
         _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
     _currentStream = _dropDownStream[0].value;
-    _testOnly();
+   // _testOnly();
   }
 
   void _testOnly(){
