@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listkontrakapp/detailkontrak/logdoc_view.dart';
-import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/kontrakeditor/kontrakeditor.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
@@ -137,7 +136,7 @@ class _DetailKontrakState extends State<DetailKontrak> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditor(EnumStateEditor.baru));
+    await openPage(context, KontrakEditor.baru());
   }
 
   Future openPage(context, Widget builder) async {

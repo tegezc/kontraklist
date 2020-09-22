@@ -7,6 +7,8 @@ class BlocShowAll {
   List<Kontrak> _cacheAllListKontrak;
   List<Kontrak> _listKontrak;
   List<StreamKontrak> _cacheStream;
+  // int _cacheIndexsort;
+  // bool _cacheAsc;
 
   BlocShowAll() {
     _cacheAllListKontrak = List();
@@ -47,6 +49,9 @@ class BlocShowAll {
           _listKontrak, EStateShowall.finish, _currentStream, _currentType);
       return itemShowAll;
     }
+    ItemShowAll itemShowAll = new ItemShowAll(_cacheStream, _types,
+        _listKontrak, EStateShowall.error, _currentStream, _currentType);
+    return itemShowAll;
   }
 
   void reloadData() {
@@ -108,6 +113,41 @@ class BlocShowAll {
     this.itemkontrakeditorSink.add(itemShowAll);
   }
 
+  void downloadCsv()async{
+    String contentCsv = '';
+    _listKontrak.forEach((element) {
+      contentCsv = contentCsv+element.toContentCsv()+'\n';
+    });
+    String filename='';
+    if(_currentStream != 0){
+      StreamKontrak sk = _cacheStream[_currentStream];
+      filename = filename+sk.realId+'_';
+    }else{
+      filename = filename+'all_';
+    }
+
+    if(_currentType == 0){
+      filename = filename+'all';
+    }else if (_currentType == 1){
+      filename = filename+'draft';
+    }else if (_currentType == 2){
+      filename = filename+'existing';
+    }else if (_currentType == 3){
+      filename = filename+'amandemen';
+    }
+    HttpAction httpAction = new HttpAction();
+    httpAction.downloadCsv(contentCsv,filename);
+
+  }
+
+  void setSortIndex(int index,bool asc){
+    ItemShowAll itemShowAll = new ItemShowAll(_cacheStream, _types,
+        _listKontrak, EStateShowall.finish, _currentStream, _currentType);
+    itemShowAll.asc = asc;
+    itemShowAll.sortIndex = index;
+    this.itemkontrakeditorSink.add(itemShowAll);
+  }
+
   void changeDropdownType(int value) {
     _currentType = value;
     ItemShowAll itemShowAll = new ItemShowAll(_cacheStream, _types,
@@ -120,6 +160,22 @@ class BlocShowAll {
     ItemShowAll itemShowAll = new ItemShowAll(_cacheStream, _types,
         _listKontrak, EStateShowall.finish, _currentStream, _currentType);
     this.itemkontrakeditorSink.add(itemShowAll);
+  }
+
+  Future<bool> deleteKontrak(Kontrak kontrak)async{
+    HttpAction httpAction = new HttpAction();
+    Map<String, dynamic> response = await httpAction.deleteKontrak(kontrak);
+    if(response != null){
+      var result = response['rowcount'];
+      if(result>0){
+        print('listkontrak: ${_listKontrak.length} cachelistkontrak: ${_cacheAllListKontrak.length}');
+        _listKontrak.remove(kontrak);
+        _cacheAllListKontrak.remove(kontrak);
+        return true;
+        print('after delete: ${_listKontrak.length} cachelistkontrak: ${_cacheAllListKontrak.length}');
+      }
+    }
+    return false;
   }
 
   void dispose() {
@@ -136,11 +192,11 @@ class ItemShowAll {
   int currentStream;
   String textLoading;
   int sortIndex;
-  bool asc;
+  bool asc = true;
 
   ItemShowAll(this.listStream, this.typeKontrak, this.listKontrak,
       this.eStateShowall, this.currentStream, this.currentType,
       {this.textLoading});
 }
 
-enum EStateShowall { loading, finish }
+enum EStateShowall { loading, finish ,error}

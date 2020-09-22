@@ -268,6 +268,12 @@ class Kontrak {
     };
   }
 
+  String toContentCsv(){
+    return '$_noKontrak;$_nama;$_namaUnit;$_anakPerusahaan;$_region;$_durasi;$_nilai;$_stream'
+        ';$_tglMulai;$_tglBerakhir;$_nmPICKontrak;$_noHpPICKontrak;$_emailPICKontrak;$_nmVendor'
+        ';$_nmPICVendor;$_noHpPICVendor;$_emailPICVendor;$_direksi;$_penandatangan;$_kontrakAwal';
+  }
+
   String toString() {
     return '$_noKontrak|$_nama|$_namaUnit|$_anakPerusahaan|$_region|$_durasi|$_nilai|$_stream'
         '|$_tglMulai|$_tglBerakhir|$_nmPICKontrak|$_noHpPICKontrak|$_emailPICKontrak|$_nmVendor'

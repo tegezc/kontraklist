@@ -5,11 +5,15 @@ import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 import 'package:listkontrakapp/util/process_string.dart';
+import 'package:loading_animations/loading_animations.dart';
 
 class KontrakEditor extends StatefulWidget {
   final EnumStateEditor enumStateEditor;
+  final Kontrak kontrak;
 
-  KontrakEditor(this.enumStateEditor);
+  KontrakEditor.baru({this.enumStateEditor=EnumStateEditor.baru,this.kontrak});
+
+  KontrakEditor.editmode(this.kontrak,{this.enumStateEditor=EnumStateEditor.edit});
 
   @override
   _KontrakEditorState createState() => _KontrakEditorState();
@@ -47,13 +51,13 @@ class _KontrakEditorState extends State<KontrakEditor> {
               body: SingleChildScrollView(
                 child: Stack(children: <Widget>[
                   KontrakEditorForm(_title, itemEditorKontrak,
-                      _blocKontrakEditor, widget.enumStateEditor),
+                      _blocKontrakEditor, widget.enumStateEditor,kontrak: widget.kontrak,),
                   itemEditorKontrak.isModeSearch
                       ? Positioned.fill(
                           child: SearchKontrak(
                               _blocKontrakEditor, itemEditorKontrak))
                       : Container(),
-                  itemEditorKontrak.isMenyimpan?Positioned.fill(child: LoadingMenyimpan(itemEditorKontrak.textLoading)):Container(),
+                 // itemEditorKontrak.isMenyimpan?Positioned.fill(child: LoadingMenyimpan(itemEditorKontrak.textLoading)):Container(),
                 ]),
               ),
             );
@@ -72,9 +76,10 @@ class KontrakEditorForm extends StatefulWidget {
   final String title;
   final BlocKontrakEditor blocKontrakEditor;
   final EnumStateEditor enumStateEditor;
+  final Kontrak kontrak;//jika edit mode, tidak boleh null
 
   KontrakEditorForm(this.title, this.itemEditorKontrak, this.blocKontrakEditor,
-      this.enumStateEditor);
+      this.enumStateEditor,{this.kontrak});
 
   @override
   _KontrakEditorFormState createState() => _KontrakEditorFormState();
@@ -84,6 +89,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
 
   static const defaultCodeStream = '000';
   final TextStyle _stylePeringatan = TextStyle(fontSize: 12,fontStyle: FontStyle.italic,color: Colors.red);
+
+  final Color colorButton = Colors.cyan[600];
+  final Color colorTextBtn = Colors.white;
 
   final _noKontrakTextController = TextEditingController();
   final _namaKontrakTextController = TextEditingController();
@@ -138,47 +146,73 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
 
   @override
   void initState() {
+    _processString = new ProcessString();
     if (widget.enumStateEditor == EnumStateEditor.baru) {
       this._initBaru();
     } else {
-      this._initEditmode();
+      this._initEditmode(widget.kontrak);
     }
     super.initState();
   }
 
-  void _initEditmode() {}
+  void _initEditmode(Kontrak kontrak) {
+    _resultKontrak = kontrak;
+
+    _dropDownStream =
+        _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
+    _currentStream = kontrak.stream;
+
+    _dtMulai = kontrak.tglMulai;
+    _dtBerakhir = kontrak.tglBerakhir;
+    _noKontrakTextController.text = kontrak.noKontrak;
+    _namaKontrakTextController.text = kontrak.nama;
+    _unitTextController.text = kontrak.namaUnit;
+    _anakPerusahaanTextController.text = kontrak.anakPerusahaan;
+    _regionTextController.text = kontrak.region;
+    _durasiTextController.text = '${kontrak.durasi}';
+    _nilaiKontrakTextController.text = '${kontrak.nilai}';
+    _nmPicKontrakTextController.text = kontrak.nmPICKontrak;
+    _noHpPicKontrakTextController.text = kontrak.noHpPICKontrak;
+    _emailPicKontrakTextController.text = kontrak.emailPICKontrak;
+    _nmVendorPemenangTextController.text = kontrak.nmVendor;
+    _nmPicVendorTextController.text = kontrak.nmPICVendor;
+    _noHpPicVendorTextController.text = kontrak.noHpPICVendor;
+    _emailPicVendorTextController.text = kontrak.emailPICVendor;
+    _direksiPekerjaanTextController.text = kontrak.direksi;
+    _penandaTanganKontrakTextController.text = kontrak.penandatangan;
+  }
 
   void _initBaru() {
     _resultKontrak = new Kontrak.kosong();
-    _processString = new ProcessString();
+
     _dropDownStream =
         _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
     _currentStream = _dropDownStream[0].value;
    // _testOnly();
   }
 
-  void _testOnly(){
-    _currentStream = _dropDownStream[1].value;
-    _dtMulai = DateTime.now();
-    _dtBerakhir = DateTime(_dtMulai.year+2,_dtMulai.month,_dtMulai.day);
-    _noKontrakTextController.text = 'RR20200101SS';
-    _namaKontrakTextController.text = 'Pengadaan Aplikasi';
-    _unitTextController.text = 'Unit 1';
-    _anakPerusahaanTextController.text = 'PT Anak Nusantara';
-    _regionTextController.text = 'Region 1';
-    _durasiTextController.text = '24';
-    _nilaiKontrakTextController.text = '1000000000';
-    _nmPicKontrakTextController.text = 'Dermawan';
-    _noHpPicKontrakTextController.text = '081767876545';
-    _emailPicKontrakTextController.text = 'coba@coooo.com';
-    _nmVendorPemenangTextController.text = 'PT Vendor';
-    _nmPicVendorTextController.text = 'Asep';
-    _noHpPicVendorTextController.text = '081804378767';
-    _emailPicVendorTextController.text = 'coba@coba.com';
-    _direksiPekerjaanTextController.text = 'Direktur';
-    _penandaTanganKontrakTextController.text = 'Direktur';
-
-  }
+  // void _testOnly(){
+  //   _currentStream = _dropDownStream[1].value;
+  //   _dtMulai = DateTime.now();
+  //   _dtBerakhir = DateTime(_dtMulai.year+2,_dtMulai.month,_dtMulai.day);
+  //   _noKontrakTextController.text = 'RR20200101SS';
+  //   _namaKontrakTextController.text = 'Pengadaan Aplikasi';
+  //   _unitTextController.text = 'Unit 1';
+  //   _anakPerusahaanTextController.text = 'PT Anak Nusantara';
+  //   _regionTextController.text = 'Region 1';
+  //   _durasiTextController.text = '24';
+  //   _nilaiKontrakTextController.text = '1000000000';
+  //   _nmPicKontrakTextController.text = 'Dermawan';
+  //   _noHpPicKontrakTextController.text = '081767876545';
+  //   _emailPicKontrakTextController.text = 'coba@coooo.com';
+  //   _nmVendorPemenangTextController.text = 'PT Vendor';
+  //   _nmPicVendorTextController.text = 'Asep';
+  //   _noHpPicVendorTextController.text = '081804378767';
+  //   _emailPicVendorTextController.text = 'coba@coba.com';
+  //   _direksiPekerjaanTextController.text = 'Direktur';
+  //   _penandaTanganKontrakTextController.text = 'Direktur';
+  //
+  // }
 
   Widget _shortField(String text, EnumValidatorTextFieldForm enumValidat,
       EnumFieldState enumFieldState, TextEditingController controller,int tag) {
@@ -803,15 +837,34 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     _resultKontrak.setstream(_currentStream);
   }
 
-  void _validateInputs(){
+  void _validateInputs()async{
     if(this._validasiTanggal() && this._validasiStream() && _formKey.currentState.validate()){
+
       _formKey.currentState.save();
       _setValueOtherField();
-      widget.blocKontrakEditor.saveKontrak(_resultKontrak).then((value) {
-        if(value){
-          //TODO:success goto detail kontrak
-        }
-      });
+      if(widget.enumStateEditor == EnumStateEditor.baru){
+         this._loadingWaiting(context,'Sedang proses menyimpan data.');
+        widget.blocKontrakEditor.saveKontrak(_resultKontrak).then((value) {
+          Navigator.of(context).pop();
+          if(value){
+            //TODO:success goto detail kontrak
+          }else{
+            this._infoError(context, 'Terjadi kesalahan saat proses menyimpan data.');
+          }
+        });
+
+      }else{
+         this._loadingWaiting(context,'Sedang proses edit data.');
+        print('masuk edit');
+        widget.blocKontrakEditor.editKontrak(_resultKontrak).then((value) {
+          Navigator.of(context).pop();
+          if(value){
+            //TODO: success edit goto detail kontrak
+          }else{
+            this._infoError(context, 'Terjadi kesalahan saat proses edit data.');
+          }
+        });
+      }
 
       print(_resultKontrak.toJson());
     }else{
@@ -820,4 +873,72 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
       });
     }
   }
+
+  Future _loadingWaiting(BuildContext context,String text) {
+    return showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: '$text ',
+              style: TextStyle(fontSize: 14,color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                  text: '\n',),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            LoadingBouncingLine.circle(backgroundColor: Colors.deepOrange),
+          ],
+        ));
+  }
+
+  Future _infoError(BuildContext context,String text) {
+    return showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: '$text ',
+              style: TextStyle(fontSize: 14,color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                  text: '\n',),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Ok',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              ),
+            ),
+          ],
+        ));
+  }
+
 }

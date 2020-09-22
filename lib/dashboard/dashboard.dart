@@ -73,7 +73,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditor(EnumStateEditor.baru));
+    await openPage(context, KontrakEditor.baru());
   }
 
   void _clickTampilkansemua() async {

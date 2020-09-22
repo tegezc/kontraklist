@@ -44,20 +44,51 @@ class BlocKontrakEditor {
     }
   }
 
-  void firstTimeEdit(){}
+  void firstTimeEdit()async{
+    HttpAction httpAction = new HttpAction();
+    Map<String, dynamic> response = await httpAction.initialCreateKontrak();
+    if (response != null) {
+      List<dynamic> ldk = response['kontrak'];
+      List<dynamic> lds = response['stream'];
+
+      ldk.forEach((element) {
+        Kontrak k = Kontrak.fromJson(element);
+        _cacheListKontrak.add(k);
+      });
+
+      lds.forEach((element) {
+        StreamKontrak stream = StreamKontrak.fromJson(element);
+        _cacheStream.add(stream);
+      });
+
+      ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
+          _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,false);
+      this.itemkontrakeditorSink.add(itemEditorKontrak);
+    }
+  }
 
   Future<bool> saveKontrak(Kontrak kontrak)async{
-    ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
-        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Mohon tunggu, sedang menyimpan data.');
-    this.itemkontrakeditorSink.add(itemEditorKontrak);
+    // ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
+    //     _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Mohon tunggu, sedang menyimpan data.');
+    // this.itemkontrakeditorSink.add(itemEditorKontrak);
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response = await httpAction.createKontrak(kontrak);
     if(response['id']!=null){
       return true;
     }
-    ItemEditorKontrak itemEditorKontrak1 = new ItemEditorKontrak(
-        _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Terjadi kesalahan saat menyimpan data.');
-    this.itemkontrakeditorSink.add(itemEditorKontrak1);
+    // ItemEditorKontrak itemEditorKontrak1 = new ItemEditorKontrak(
+    //     _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Terjadi kesalahan saat menyimpan data.');
+    // this.itemkontrakeditorSink.add(itemEditorKontrak1);
+    return false;
+  }
+
+  Future<bool> editKontrak(Kontrak kontrak)async{
+
+    HttpAction httpAction = new HttpAction();
+    Map<String, dynamic> response = await httpAction.editKontrak(kontrak);
+    if(response['id']!=null){
+      return true;
+    }
     return false;
   }
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:listkontrakapp/allkontrak/blocshowall.dart';
-import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/kontrakeditor/kontrakeditor.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
+import 'package:loading_animations/loading_animations.dart';
 
 class ShowAllKontrak extends StatefulWidget {
   @override
@@ -25,10 +25,10 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   final TextStyle _styleLabelCombo =
       new TextStyle(fontSize: 12, color: Colors.blue);
 
+  final Color colorButton = Colors.cyan[600];
+  final Color colorTextBtn = Colors.white;
+
   BlocShowAll _blocShowAll;
-  bool _ascnama = true;
-  bool _ascnilai = true;
-  bool _ascberakhir = true;
 
   @override
   void initState() {
@@ -53,12 +53,7 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
       });
       _dropDownStream = getDropDownMenuItems(itemShowAll.listStream);
       _dropDownTypes = getDropDownTypeItems(itemShowAll.typeKontrak);
-      Map<String,String> mp = Map();
-      itemShowAll.listStream.forEach((element) {
 
-        mp[element.realId] = element.nama;
-      });
-      _dtsKontrak = KontrakDataSourceTable(mp);
       _blocShowAll.reloadData();
     });
   }
@@ -129,168 +124,153 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             ItemShowAll itemShowAll = snapshot.data;
-            if (itemShowAll.listKontrak.isEmpty) {
-              return BelumAdaData();
-            } else {
-              _dtsKontrak.lkontrak = itemShowAll.listKontrak;
-              return Scaffold(
-                body: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 55.0, top: 15.0, bottom: 10.0),
-                        child: FlatButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            icon: Icon(Icons.keyboard_backspace),
-                            label: Text('Kembali')),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 55.0, right: 55.0, top: 15.0, bottom: 10.0),
-                        child: Container(
-                          height: 2,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 55.0, right: 55.0, top: 15.0, bottom: 0.0),
-                        child: Card(
-                          child: Wrap(
-                            direction: Axis.horizontal,
-                            children: [
-                              SizedBox(
-                                width: 50,
-                              ),
-                              _combobox(
-                                  _dropDownStream,
-                                  itemShowAll.currentStream,
-                                  'Stream :',
-                                  changedDropDownItem),
-                              SizedBox(
-                                width: 50,
-                              ),
-                              _combobox(_dropDownTypes, itemShowAll.currentType,
-                                  'Type :', changedDropDownItemType),
-                              SizedBox(
-                                width: 50,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    bottom: 8.0,
-                                    top: 8.0,
-                                    right: 20,
-                                    left: 10.0),
-                                child: RaisedButton(
-                                  color: Colors.cyan[600],
-                                  textColor: Colors.white,
-                                  child: Text('Tampilkan'),
-                                  onPressed: () {
-                                    _blocShowAll.filter();
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 55.0, right: 55.0, top: 0.0, bottom: 10.0),
-                        child: PaginatedDataTable(
-                          sortAscending: false,
-                          sortColumnIndex: 6,
-                          columnSpacing: 40,
-                          source: _dtsKontrak,
-                          header:
-                              Center(child: Text(DataTableConstants.dtTitle)),
-                          onRowsPerPageChanged: (r) {
-                            setState(() {
-                              _rowPerPage = r;
-                            });
+            _dtsKontrak = KontrakDataSourceTable(
+                itemShowAll.listKontrak, _mapStream, _clickCell);
+            return Scaffold(
+              body: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 55.0, top: 15.0, bottom: 10.0),
+                      child: FlatButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
                           },
-                          rowsPerPage: _rowPerPage,
-                          actions: [
-                            Tooltip(
-                              padding: EdgeInsets.all(8.0),
-                              message: 'Export ke CSV',
-                              verticalOffset: 16,
-                              height: 24,
-                              child: IconButton(
-                                  icon: Icon(Icons.system_update_alt),
-                                  onPressed: () {}),
+                          icon: Icon(Icons.keyboard_backspace),
+                          label: Text('Kembali')),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 55.0, right: 55.0, top: 15.0, bottom: 10.0),
+                      child: Container(
+                        height: 2,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 55.0, right: 55.0, top: 15.0, bottom: 0.0),
+                      child: Card(
+                        child: Wrap(
+                          direction: Axis.horizontal,
+                          children: [
+                            SizedBox(
+                              width: 50,
                             ),
-                            Tooltip(
-                              padding: EdgeInsets.all(8.0),
-                              message: 'Tambah kontrak baru.',
-                              verticalOffset: 16,
-                              height: 24,
-                              child: IconButton(
-                                  icon: Icon(Icons.add),
-                                  onPressed: () {
-                                    _clickKontrakBaru();
-                                  }),
+                            _combobox(
+                                _dropDownStream,
+                                itemShowAll.currentStream,
+                                'Stream :',
+                                changedDropDownItem),
+                            SizedBox(
+                              width: 50,
                             ),
-                          ],
-                          columns: [
-                            DataColumn(
-                              label: Text(DataTableConstants.colAction),
+                            _combobox(_dropDownTypes, itemShowAll.currentType,
+                                'Type :', changedDropDownItemType),
+                            SizedBox(
+                              width: 50,
                             ),
-                            DataColumn(
-                              label: Text(''),
-                            ),
-                            DataColumn(
-                                label: Text(DataTableConstants.colNoKontrak)),
-                            DataColumn(
-                              label: Text(DataTableConstants.colNmKontrak),
-                              onSort: (colIndex, asc) {
-                                _sort<String>((kontrak) => kontrak.nama,
-                                    colIndex, asc, _dtsKontrak);
-                                _ascnama = !_ascnama;
-                              },
-                            ),
-                            DataColumn(
-                                label: Text(DataTableConstants.colNmUnit)),
-                            DataColumn(
-                                label: Text(DataTableConstants.colStream)),
-                            DataColumn(
-                                label: Text(DataTableConstants.colNilai),
-                                onSort: (colIndex, asc) {
-                                  print('nilai; $asc');
-                                  _sort<num>((kontrak) => kontrak.nilai, colIndex,
-                                      asc, _dtsKontrak);
-                                  _ascnilai = !_ascnilai;
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  bottom: 8.0, top: 8.0, right: 20, left: 10.0),
+                              child: RaisedButton(
+                                color: Colors.cyan[600],
+                                textColor: Colors.white,
+                                child: Text('Tampilkan'),
+                                onPressed: () {
+                                  _blocShowAll.filter();
                                 },
-                                numeric: true),
-                            DataColumn(
-                              label: Text(DataTableConstants.colTglBerakhir),
-                              onSort: (colIndex, asc) {
-                                _sort<DateTime>(
-                                    (kontrak) => kontrak.tglBerakhir,
-                                    colIndex,
-                                    asc,
-                                    _dtsKontrak);
-                                _ascberakhir = !_ascberakhir;
-                              },
+                              ),
                             ),
-                            DataColumn(
-                                label: Text(DataTableConstants.colDetail)),
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: 200,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 55.0, right: 55.0, top: 0.0, bottom: 10.0),
+                      child: PaginatedDataTable(
+                        sortAscending: itemShowAll.asc,
+                        sortColumnIndex: itemShowAll.sortIndex,
+                        columnSpacing: 40,
+                        source: _dtsKontrak,
+                        header: Center(child: Text(DataTableConstants.dtTitle)),
+                        onRowsPerPageChanged: (r) {
+                          setState(() {
+                            _rowPerPage = r;
+                          });
+                        },
+                        rowsPerPage: _rowPerPage,
+                        actions: [
+                          Tooltip(
+                            padding: EdgeInsets.all(8.0),
+                            message: 'Export ke CSV',
+                            verticalOffset: 16,
+                            height: 24,
+                            child: IconButton(
+                                icon: Icon(Icons.system_update_alt),
+                                onPressed: () {
+                                  _blocShowAll.downloadCsv();
+                                }),
+                          ),
+                          Tooltip(
+                            padding: EdgeInsets.all(8.0),
+                            message: 'Tambah kontrak baru.',
+                            verticalOffset: 16,
+                            height: 24,
+                            child: IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () {
+                                  _clickKontrakBaru();
+                                }),
+                          ),
+                        ],
+                        columns: [
+                          DataColumn(
+                            label: Text(DataTableConstants.colAction),
+                          ),
+                          DataColumn(
+                            label: Text(''),
+                          ),
+                          DataColumn(
+                              label: Text(DataTableConstants.colNoKontrak)),
+                          DataColumn(
+                            label: Text(DataTableConstants.colNmKontrak),
+                            onSort: (colIndex, asc) {
+                              _sort<String>((kontrak) => kontrak.nama, colIndex,
+                                  asc, _dtsKontrak);
+                            },
+                          ),
+                          DataColumn(label: Text(DataTableConstants.colNmUnit)),
+                          DataColumn(label: Text(DataTableConstants.colStream)),
+                          DataColumn(
+                              label: Text(DataTableConstants.colNilai),
+                              onSort: (colIndex, asc) {
+                                print('nilai; $asc');
+                                _sort<num>((kontrak) => kontrak.nilai, colIndex,
+                                    asc, _dtsKontrak);
+                              },
+                              numeric: true),
+                          DataColumn(
+                            label: Text(DataTableConstants.colTglBerakhir),
+                            onSort: (colIndex, asc) {
+                              _sortDate(colIndex, asc, _dtsKontrak);
+                            },
+                          ),
+                          DataColumn(label: Text(DataTableConstants.colDetail)),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      height: 200,
+                    ),
+                  ],
                 ),
-              );
-            }
+              ),
+            );
           } else if (snapshot.hasError) {
             return ErrorPage();
           } else {
@@ -308,7 +288,137 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditor(EnumStateEditor.baru));
+    await openPage(context, KontrakEditor.baru());
+  }
+
+  void _clickCell(
+      EnumCallBackClickCell enumCallBackClickCell, int index, Kontrak kontrak) {
+    print('sampai kah');
+    switch (enumCallBackClickCell) {
+      case EnumCallBackClickCell.delete:
+        this._handleDelete(index, kontrak);
+        break;
+      case EnumCallBackClickCell.edit:
+        this._handleEdit(index, kontrak);
+        break;
+      case EnumCallBackClickCell.detail:
+        this._handleViewDetail(index, kontrak);
+        break;
+      case EnumCallBackClickCell.nokontrak:
+        this._handleShowDocument(index, kontrak);
+        break;
+    }
+  }
+
+  void _handleDelete(int index, Kontrak kontrak) async {
+    await _showDialogConfirmDelete(context,kontrak);
+  }
+
+  void _handleEdit(int index, Kontrak kontrak) async{
+    await openPage(context, KontrakEditor.editmode(kontrak));
+  }
+
+  void _handleViewDetail(int index, Kontrak kontrak) {}
+
+  void _handleShowDocument(int index, Kontrak kontrak) {}
+
+  Future _showDialogConfirmDelete(BuildContext context,Kontrak kontrak) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => SimpleDialog(
+              title: RichText(
+                text: TextSpan(
+                  text: 'Apakah anda yakin akan menghapus kontrak ',
+                  style: TextStyle(fontSize: 14,color: Colors.black),
+                  children: <TextSpan>[
+                    TextSpan(
+                        text: kontrak.noKontrak==null?'?\n':'${kontrak.noKontrak}?\n',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(text: 'Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+                  ],
+                ),
+              ),
+              //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(
+                      right: 16.0, left: 16.0, bottom: 3.0),
+                  child: RaisedButton(
+                    color: colorButton,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                        side: BorderSide(color: Colors.cyan)),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      _confirmedDelete(kontrak);
+                    },
+                    child: Text(
+                      'Ya',
+                      style: TextStyle(
+                          color: colorTextBtn,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      right: 16.0, left: 16.0, bottom: 3.0),
+                  child: RaisedButton(
+                    color: colorButton,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                        side: BorderSide(color: Colors.cyan)),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                          color: colorTextBtn,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0),
+                    ),
+                  ),
+                ),
+              ],
+            ));
+  }
+
+  Future _loadingWaiting(BuildContext context,String text) {
+    return showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: '$text ',
+              style: TextStyle(fontSize: 14,color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                    text: '\n',),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            LoadingBouncingLine.circle(backgroundColor: Colors.deepOrange),
+          ],
+        ));
+  }
+
+  void _confirmedDelete(kontrak){
+    this._loadingWaiting(context, 'Sedang menghapus data...');
+    _blocShowAll.deleteKontrak(kontrak).then((value) {
+      if(value){
+        Navigator.of(context).pop();
+        _blocShowAll.reloadData();
+      }
+    });
   }
 
   Future openPage(context, Widget builder) async {
@@ -323,19 +433,22 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   void _sort<T>(Comparable<T> Function(Kontrak kontrak) getField, int colIndex,
       bool asc, KontrakDataSourceTable _src) {
     _src.sort<T>(getField, asc);
+    _blocShowAll.setSortIndex(colIndex, asc);
   }
 
-  // void _sortInt(int Function(Kontrak kontrak) getField, int colIndex, bool asc,
-  //     KontrakDataSourceTable _src) {
-  //   _src.sortInt(getField, asc);
-  // }
+  /// handle date null value
+  void _sortDate(int colIndex, bool asc, KontrakDataSourceTable _src) {
+    _src.sortDate(asc);
+    _blocShowAll.setSortIndex(colIndex, asc);
+  }
 }
 
 class KontrakDataSourceTable extends DataTableSource {
   List<Kontrak> lkontrak;
   final Map<String, String> mapStream;
+  final Function clickCell;
 
-  KontrakDataSourceTable(this.mapStream);
+  KontrakDataSourceTable(this.lkontrak, this.mapStream, this.clickCell);
 
   Widget _contentNama(String text) {
     return SizedBox(
@@ -351,17 +464,17 @@ class KontrakDataSourceTable extends DataTableSource {
     return DataRow.byIndex(index: index, cells: [
 //      DataCell(Text('Action delete / Edit'), showEditIcon: true,onTap: (){print('tap kolom action');}),
       DataCell(
-          IconButton(
-              icon: Icon(Icons.delete_forever),
-              onPressed: () {
-                print('icon delete di klik');
-              }),
-          onTap: () {}),
+        IconButton(
+            icon: Icon(Icons.delete_forever),
+            onPressed: () async {
+              this._clickCell(EnumCallBackClickCell.delete, index, k);
+            }),
+      ),
       DataCell(Text(''), onTap: () {
-        print('edit');
+        this._clickCell(EnumCallBackClickCell.edit, index, k);
       }, showEditIcon: true),
       DataCell(Text('${k.noKontrak == null ? '' : k.noKontrak}'), onTap: () {
-        print('tap kolom no kontrak');
+        this._clickCell(EnumCallBackClickCell.nokontrak, index, k);
       }),
       DataCell(_contentNama(k.nama)),
       DataCell(Text('${k.namaUnit}')),
@@ -381,7 +494,9 @@ class KontrakDataSourceTable extends DataTableSource {
 //     DataCell(Text('${k.direksi}')),
 //     DataCell(Text('${k.penandatangan}')),
 //     DataCell(Text('${k.kontrakAwal}')),
-      DataCell(Text('Tampilkan Detail')),
+      DataCell(Text('Tampilkan Detail'), onTap: () {
+        this._clickCell(EnumCallBackClickCell.detail, index, k);
+      }),
     ]);
   }
 
@@ -406,16 +521,25 @@ class KontrakDataSourceTable extends DataTableSource {
     notifyListeners();
   }
 
+  // karena tanggal ada kemungkinan null
+  void sortDate(bool ascending) {
+    lkontrak.sort((a, b) {
+      final aValue =
+          a.tglBerakhir == null ? DateTime(1980, 1, 1) : a.tglBerakhir;
+      final bValue =
+          b.tglBerakhir == null ? DateTime(1980, 1, 1) : b.tglBerakhir;
+      return ascending
+          ? Comparable.compare(aValue, bValue)
+          : Comparable.compare(bValue, aValue);
+    });
 
-  // void sortInt(int Function(Kontrak d) getField, bool ascending) {
-  //   lkontrak.sort((a, b) {
-  //     final int aValue = getField(a);
-  //     final int bValue = getField(b);
-  //     return ascending
-  //         ? Comparable.compare(aValue, bValue)
-  //         : Comparable.compare(bValue, aValue);
-  //   });
-  //
-  //   notifyListeners();
-  // }
+    notifyListeners();
+  }
+
+  void _clickCell(
+      EnumCallBackClickCell enumCallBackClickCell, int index, Kontrak kontrak) {
+    clickCell(enumCallBackClickCell, index, kontrak);
+  }
 }
+
+enum EnumCallBackClickCell { delete, edit, detail, nokontrak }
