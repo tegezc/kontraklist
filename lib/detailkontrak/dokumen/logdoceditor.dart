@@ -1,69 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:listkontrakapp/detailkontrak/dokumen/blocdokeditor.dart';
 import 'package:listkontrakapp/model/enum_app.dart';
+import 'package:listkontrakapp/model/kontrak.dart';
+import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 import 'package:listkontrakapp/util/process_string.dart';
 import 'package:listkontrakapp/util/util_color.dart';
 
 class LogDocEditor extends StatefulWidget {
+  final int idkontrak;
+  final String jnsdok;
+  final EnumStateEditor enumStateEditor;
+
+  LogDocEditor.baru(this.idkontrak, this.jnsdok,
+      {this.enumStateEditor = EnumStateEditor.baru});
+
+  LogDocEditor.edit(this.idkontrak, this.jnsdok,
+      {this.enumStateEditor = EnumStateEditor.edit});
+
   @override
   _LogDocEditorState createState() => _LogDocEditorState();
 }
 
 class _LogDocEditorState extends State<LogDocEditor> {
   String _title;
+  BlocDokumenEditor _blocDokumenEditor;
 
   @override
   void initState() {
-    _title = 'Dokumen Baru';
+    _blocDokumenEditor = new BlocDokumenEditor();
+    widget.enumStateEditor == EnumStateEditor.baru
+        ? _title = 'Dokumen Baru'
+        : _title = 'Edit Dokumen';
     super.initState();
+    setupFirstime();
+  }
+
+  void setupFirstime() {
+    if (widget.enumStateEditor == EnumStateEditor.baru) {
+      _blocDokumenEditor.firstimeBaru(widget.idkontrak, widget.jnsdok);
+    } else {}
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return StreamBuilder(
+        stream: _blocDokumenEditor.itemdokumeneditorStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return ErrorPage();
+          } else if (snapshot.hasData) {
+            ItemDokumenEditor itemDokumenEditor = snapshot.data;
+            return Scaffold(
 //      appBar: AppBar(
 //        title:Text(_title),
 //        backgroundColor: Colors.cyan,
 //      ),
-      body: SingleChildScrollView(
-        child: LogDocEditorForm(_title),
-      ),
-    );
+              body: SingleChildScrollView(
+                child: LogDocEditorForm(itemDokumenEditor.logDokumen,_title),
+              ),
+            );
+          } else {
+            return LoadingNunggu('Mohon tunggu...');
+          }
+        });
   }
 }
 
 class LogDocEditorForm extends StatefulWidget {
   final String title;
+  final LogDokumen logDokumen;
 
-  LogDocEditorForm(this.title);
+  LogDocEditorForm(this.logDokumen, this.title);
 
   @override
   _LogDocEditorFormState createState() => _LogDocEditorFormState();
 }
 
 class _LogDocEditorFormState extends State<LogDocEditorForm> {
-  final _noKontrakTextController = TextEditingController();
-  final _namaKontrakTextController = TextEditingController();
+  final _keteranganTextController = TextEditingController();
+  final _namaTextController = TextEditingController();
   final _versiController = TextEditingController();
 
-  double _formProgress = 0;
   DateTime _tanggal;
+  double _formProgress = 0;
   ProcessString _processString;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false;
+  AutovalidateMode _autoValidate = AutovalidateMode.disabled;
 
   @override
   void dispose() {
-    _noKontrakTextController.dispose();
-    _namaKontrakTextController.dispose();
+    _keteranganTextController.dispose();
+    _namaTextController.dispose();
     _versiController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    _tanggal = DateTime.now();
     _processString = new ProcessString();
+    this._setupInit();
     super.initState();
+  }
+  
+  void _setupInit(){
+    _tanggal = widget.logDokumen.tanggal;
+    _keteranganTextController.text = widget.logDokumen.keterangan;
+    _namaTextController.text = widget.logDokumen.namaReviewer;
+    _versiController.text = '${widget.logDokumen.versi}';
   }
 
   Widget _shortField(
@@ -81,7 +124,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
             height: 4,
           ),
           TextFormField(
-            autovalidate: _autoValidate,
+            autovalidateMode: _autoValidate,
             validator: (value) {
               switch (enumValidat) {
                 case EnumValidatorTextFieldForm.email:
@@ -167,7 +210,9 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
                 text: txtLabel,
                 style: DefaultTextStyle.of(context).style,
                 children: <TextSpan>[
-                  TextSpan(text: ' ( * Wajib )', style: TextStyle(color: Colors.red)),
+                  TextSpan(
+                      text: ' ( * Wajib )',
+                      style: TextStyle(color: Colors.red)),
                 ],
               ),
             ),
@@ -184,8 +229,8 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   }
 
   Widget _widgetLabelTextForm(
-      String text, TextEditingController controller, int ver) {
-    controller.text = '$ver';
+      String text, TextEditingController controller) {
+   // controller.text = '$ver';
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: Column(
@@ -211,7 +256,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   }
 
   Widget _cardInternalPerusahaan(double width) {
-    String txtBerakhir = _processString.dateToStringDdMmmYyyyShort(_tanggal);
+    String txtBerakhir = _processString.dateToStringDdMmmYyyyShort(widget.logDokumen.tanggal);
     double w = width / 20;
     return Container(
       width: width,
@@ -220,11 +265,15 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _shortField('Keterangan', 5, EnumValidatorTextFieldForm.bebas,
-                _noKontrakTextController),
+                _keteranganTextController),
             _shortField('Nama Reviewer', 1, EnumValidatorTextFieldForm.bebas,
-                _namaKontrakTextController),
-            _widgetLabelTextForm('Versi ( Angka otomatis, tidak dapat di rubah )',_versiController,2),
-            SizedBox(height: 8,),
+                _namaTextController),
+            _widgetLabelTextForm(
+                'Versi ( Angka otomatis, tidak dapat di rubah )',
+                _versiController),
+            SizedBox(
+              height: 8,
+            ),
             _widgetLabelAndButtonVer('Tanggal:', txtBerakhir, w * 9, () {
               _actionBtnTglAkhirKlik(context);
             }),
@@ -339,7 +388,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
     } else {
 //    If all data are not valid then start auto validation.
       setState(() {
-        _autoValidate = true;
+        _autoValidate = AutovalidateMode.onUserInteraction;
       });
     }
   }

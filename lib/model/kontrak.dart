@@ -268,7 +268,7 @@ class Kontrak {
     };
   }
 
-  String toContentCsv(){
+  String toContentCsv() {
     return '$_noKontrak;$_nama;$_namaUnit;$_anakPerusahaan;$_region;$_durasi;$_nilai;$_stream'
         ';$_tglMulai;$_tglBerakhir;$_nmPICKontrak;$_noHpPICKontrak;$_emailPICKontrak;$_nmVendor'
         ';$_nmPICVendor;$_noHpPICVendor;$_emailPICVendor;$_direksi;$_penandatangan;$_kontrakAwal';
@@ -282,10 +282,14 @@ class Kontrak {
 }
 
 class LogDokumen {
+  int id;
+  int realId;
   String namaReviewer;
   String keterangan;
   DateTime tanggal;
   int versi;
+  String jnsDoc;
+  int realIdKontrak;
   String linkPdf;
   String linkDoc;
 
@@ -297,47 +301,63 @@ class LogDokumen {
       @required this.linkPdf,
       this.linkDoc});
 
+  LogDokumen.fromJson(Map<String, dynamic> json) {
+    ProcessString processString = new ProcessString();
+    this.id = int.parse(json[TagJsonDok.fId]);
+    this.realId = int.parse(json[TagJsonDok.fRealId]);
+    this.keterangan = json[TagJsonDok.fKet];
+    this.namaReviewer = json[TagJsonDok.fId];
+    this.tanggal = json[TagJsonDok.fTgl] == null
+        ? null
+        : processString.dateFromLongString(json[TagJsonDok.fTgl]);
+    this.versi = int.parse(json[TagJsonDok.fVersi]);
+    this.jnsDoc = json[TagJsonDok.fJnsDok];
+    this.realIdKontrak = int.parse(json[TagJsonDok.fRealIdKontrak]);
+    this.linkPdf = json[TagJsonDok.fLinkPdf];
+    this.linkDoc = json[TagJsonDok.fLinkDoc];
+  }
+
   String get strTanggal {
     ProcessString processString = new ProcessString();
     return processString.dateToStringDdMmmmYyyy(tanggal);
   }
 
-  static List<LogDokumen> getDummyLog() {
-    return <LogDokumen>[
-      LogDokumen(
-        namaReviewer: "Captain America",
-        keterangan: "Shield",
-        tanggal: DateTime.now(),
-        versi: 1,
-        linkPdf: 'link ke pdf',
-        linkDoc: 'linkkedoc',
-      ),
-      LogDokumen(
-        namaReviewer: "Captain America",
-        keterangan: "Shield",
-        tanggal: DateTime.now(),
-        versi: 2,
-        linkPdf: 'link ke pdf',
-        linkDoc: 'linkkedoc',
-      ),
-      LogDokumen(
-        namaReviewer: "Captain America",
-        keterangan: "Shield",
-        tanggal: DateTime.now(),
-        versi: 3,
-        linkPdf: 'link ke pdf',
-        linkDoc: 'linkkedoc',
-      ),
-      LogDokumen(
-        namaReviewer: "Captain America",
-        keterangan: "Shield",
-        tanggal: DateTime.now(),
-        versi: 4,
-        linkPdf: 'link ke pdf',
-        linkDoc: 'linkkedoc',
-      )
-    ];
-  }
+  // static List<LogDokumen> getDummyLog() {
+  //   return <LogDokumen>[
+  //     LogDokumen(
+  //       namaReviewer: "Captain America",
+  //       keterangan: "Shield",
+  //       tanggal: DateTime.now(),
+  //       versi: 1,
+  //       linkPdf: 'link ke pdf',
+  //       linkDoc: 'linkkedoc',
+  //     ),
+  //     LogDokumen(
+  //       namaReviewer: "Captain America",
+  //       keterangan: "Shield",
+  //       tanggal: DateTime.now(),
+  //       versi: 2,
+  //       linkPdf: 'link ke pdf',
+  //       linkDoc: 'linkkedoc',
+  //     ),
+  //     LogDokumen(
+  //       namaReviewer: "Captain America",
+  //       keterangan: "Shield",
+  //       tanggal: DateTime.now(),
+  //       versi: 3,
+  //       linkPdf: 'link ke pdf',
+  //       linkDoc: 'linkkedoc',
+  //     ),
+  //     LogDokumen(
+  //       namaReviewer: "Captain America",
+  //       keterangan: "Shield",
+  //       tanggal: DateTime.now(),
+  //       versi: 4,
+  //       linkPdf: 'link ke pdf',
+  //       linkDoc: 'linkkedoc',
+  //     )
+  //   ];
+  // }
 }
 
 class StreamKontrak {

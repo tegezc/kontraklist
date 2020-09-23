@@ -36,6 +36,13 @@ class BelumAdaData extends StatelessWidget {
   }
 }
 
+class BelumAdaDataContainer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Belum ada data kontrak.'));
+  }
+}
+
 class ErrorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

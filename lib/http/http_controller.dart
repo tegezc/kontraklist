@@ -32,6 +32,27 @@ class HttpAction {
     }
   }
 
+  Future<Map<String, dynamic>> getDetailKontrak(Kontrak kontrak) async {
+    try {
+      // print(_host);
+      final response = await http.get( '$_host/kontraks/${kontrak.realID}');
+      //print('masuk sini');
+      if (response.statusCode == 200) {
+        //print('masuk sini1');
+        // If the server did return a 200 OK response,
+        // then parse the JSON.
+        // print(response.body);
+        return json.decode(response.body);
+      } else {
+        // print('masuk sini2');
+        return null;
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>> createKontrak(Kontrak kontrak) async {
 //String jsondata = "{\"nokontrak\":\"RR20231201SS\",\"nama\":\"Pengadaan Anti Virus Norton 2018 untuk divisi IT PT Pertamina \",\"namaunit\":\"IT Divisi\",\"anakperusahaan\":\"PT Anak Perusahaan\",\"region\":\"region 1\",\"stream\":\"\",\"durasi\":24,\"nilai\":900000000,\"tanggal_mulai\":\"2020-08-01\",\"tanggal_berakhir\":\"2022-08-01\",\"nm_pic_kontrak\":\"Heri\",\"hp_pic_kontrak\":\"0889898981\",\"email_pic_kontrak\":\"kontrak@contoh.com\",\"vendor_pemenanga\":\"PT Vendor Pertamina\",\"nm_pic_vendor\":\"Gunawan \",\"no_pic_vendor\":\"08766767689\",\"email_pic_vendor\":\"budi@coba.com\",\"direksi\":\"direksi\",\"penandatangan\":\"penandatangan\",\"kontrak_awal\":\"\",\"email\":\"budi@coba.com\"}";
 //Kontrak k = new Kontrak.fromJson(json.decode(jsondata));
@@ -136,6 +157,21 @@ class HttpAction {
     }
   }
 
+  Future<Map<String, dynamic>> initialCreateDokumen(int idkontrak,String jnsdok)async{
+    try {
 
+      final response = await http.get( '$_host/dokumen/$idkontrak/$jnsdok');
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+         print(response.body);
+        return null;
+      }
+    } catch (e) {
+    print(e.toString());
+    return null;
+    }
+  }
 
 }

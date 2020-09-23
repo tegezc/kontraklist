@@ -172,7 +172,7 @@ class BlocShowAll {
         _listKontrak.remove(kontrak);
         _cacheAllListKontrak.remove(kontrak);
         return true;
-        print('after delete: ${_listKontrak.length} cachelistkontrak: ${_cacheAllListKontrak.length}');
+      //  print('after delete: ${_listKontrak.length} cachelistkontrak: ${_cacheAllListKontrak.length}');
       }
     }
     return false;

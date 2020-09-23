@@ -1,12 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:listkontrakapp/detailkontrak/logdoc_view.dart';
+import 'package:listkontrakapp/detailkontrak/blocdetailkontrak.dart';
+import 'package:listkontrakapp/detailkontrak/dokumen/logdoc_view.dart';
 import 'package:listkontrakapp/kontrakeditor/kontrakeditor.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
+import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 
 final double widthCell = 200.0;
 
@@ -22,9 +22,18 @@ class DetailKontrak extends StatefulWidget {
 class _DetailKontrakState extends State<DetailKontrak> {
   final _scrollControllerUtama = ScrollController();
   final _scrollControllerTable = ScrollController();
+  BlocDetailKontrak _blocDetailKontrak;
+
+  @override
+  void initState() {
+    _blocDetailKontrak = new BlocDetailKontrak();
+    super.initState();
+    _blocDetailKontrak.firstTime(widget.kontrak);
+  }
 
   @override
   void dispose() {
+    _blocDetailKontrak.dispose();
     _scrollControllerTable.dispose();
     _scrollControllerUtama.dispose();
     super.dispose();
@@ -32,95 +41,108 @@ class _DetailKontrakState extends State<DetailKontrak> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width / 20;
-    double widthtable = width * 19;
-    double widhtLog = width * 16;
-    return Scaffold(
-      body: Scrollbar(
-        controller: _scrollControllerUtama,
-        isAlwaysShown: true,
-        child: SingleChildScrollView(
-          controller: _scrollControllerUtama,
-          scrollDirection: Axis.vertical,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 40.0, top: 20),
-                      child: FlatButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          icon: Icon(Icons.keyboard_backspace),
-                          label: Text('Kembali')),
-                    ),
-                    Spacer(),
-                  ],
-                ),
-                _header(),
-                Card(
-                  child: Scrollbar(
-                    isAlwaysShown: true,
-                    controller: _scrollControllerTable,
-                    child: SingleChildScrollView(
-                      controller: _scrollControllerTable,
-                      scrollDirection: Axis.horizontal,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+    return StreamBuilder(
+        stream: _blocDetailKontrak.itemDetailkontrakStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return ErrorPage();
+          } else if (snapshot.hasData) {
+            ItemDetailKontrak itemDetailKontrak = snapshot.data;
+            double width = MediaQuery.of(context).size.width / 20;
+            double widthtable = width * 19;
+            double widhtLog = width * 16;
+            return Scaffold(
+              body: Scrollbar(
+                controller: _scrollControllerUtama,
+                isAlwaysShown: true,
+                child: SingleChildScrollView(
+                  controller: _scrollControllerUtama,
+                  scrollDirection: Axis.vertical,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Column(
+                      children: [
+                        Row(
                           children: [
                             Padding(
-                                padding: const EdgeInsets.only(right: 20),
-                                child: RaisedButton(
+                              padding:
+                                  const EdgeInsets.only(left: 40.0, top: 20),
+                              child: FlatButton.icon(
                                   onPressed: () {
-                                    _clickKontrakBaru();
+                                    Navigator.of(context).pop();
                                   },
-                                  color: Colors.cyan[600],
-                                  textColor: Colors.white,
-                                  child: Text('Edit'),
-                                )),
-                            SizedBox(
-                              height: 10,
+                                  icon: Icon(Icons.keyboard_backspace),
+                                  label: Text('Kembali')),
                             ),
-                            Table2column(null, widthtable),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            Table5column(null, widthtable),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            CardPICKontrak(null, widthtable),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            CardVendor(null, widthtable),
-                            SizedBox(
-                              height: 10,
-                            ),
+                            Spacer(),
                           ],
                         ),
-                      ),
+                        _header(),
+                        Card(
+                          child: Scrollbar(
+                            isAlwaysShown: true,
+                            controller: _scrollControllerTable,
+                            child: SingleChildScrollView(
+                              controller: _scrollControllerTable,
+                              scrollDirection: Axis.horizontal,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 20),
+                                        child: RaisedButton(
+                                          onPressed: () {
+                                            _clickEditKontrak(itemDetailKontrak.kontrak);
+                                          },
+                                          color: Colors.cyan[600],
+                                          textColor: Colors.white,
+                                          child: Text('Edit'),
+                                        )),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Table2column(widget.kontrak, widthtable),
+                                    SizedBox(
+                                      height: 16,
+                                    ),
+                                    Table5column(widget.kontrak, widthtable),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    CardPICKontrak(widget.kontrak, widthtable),
+                                    SizedBox(
+                                      height: 16,
+                                    ),
+                                    CardVendor(widget.kontrak, widthtable),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        Expansionpanel(widhtLog,itemDetailKontrak),
+                        SizedBox(
+                          height: 400,
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 30,
-                ),
-                Expansionpanel(widhtLog),
-                SizedBox(
-                  height: 400,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+              ),
+            );
+          } else {
+            return LoadingNunggu('Sedang load data.');
+          }
+        });
   }
 
   Widget _header() {
@@ -135,8 +157,8 @@ class _DetailKontrakState extends State<DetailKontrak> {
     );
   }
 
-  void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditor.baru());
+  void _clickEditKontrak(Kontrak kontrak) async {
+    await openPage(context, KontrakEditor.editmode(kontrak));
   }
 
   Future openPage(context, Widget builder) async {
@@ -166,10 +188,7 @@ class _CardVendorState extends State<CardVendor> {
   @override
   void initState() {
     _widthPoint = widget.width / 20;
-    if (widget.kontrak == null) {
-      Map<String, dynamic> strjson = json.decode(dummykontrak);
-      _kontrak = Kontrak.fromJson(strjson);
-    }
+    _kontrak = widget.kontrak;
     super.initState();
   }
 
@@ -274,10 +293,7 @@ class _CardPICKontrakState extends State<CardPICKontrak> {
   @override
   void initState() {
     _widthPoint = widget.width / 20;
-    if (widget.kontrak == null) {
-      Map<String, dynamic> strjson = json.decode(dummykontrak);
-      _kontrak = Kontrak.fromJson(strjson);
-    }
+    _kontrak = widget.kontrak;
     super.initState();
   }
 
@@ -367,10 +383,7 @@ class _Table5columnState extends State<Table5column> {
   @override
   void initState() {
     _widthPoint = widget.width / 20;
-    if (widget.kontrak == null) {
-      Map<String, dynamic> strjson = json.decode(dummykontrak);
-      _kontrak = Kontrak.fromJson(strjson);
-    }
+    _kontrak = widget.kontrak;
     super.initState();
   }
 
@@ -521,10 +534,7 @@ class _Table2columnState extends State<Table2column> {
   @override
   void initState() {
     _widthPoint = widget.width / 20;
-    if (widget.kontrak == null) {
-      Map<String, dynamic> strjson = json.decode(dummykontrak);
-      _kontrak = Kontrak.fromJson(strjson);
-    }
+    _kontrak = widget.kontrak;
     super.initState();
   }
 
@@ -729,6 +739,3 @@ class LabelDetailKontrakType2 extends StatelessWidget {
     }
   }
 }
-
-final dummykontrak =
-    "{\"id\":111111111111,\"nokontrak\":\"nokontrak1\",\"namakontrak\":\"anamakontrak1 namakontrak1 namakontrak1 namakontrak1 namakontrak1 namakontrak1 namakontrak1 namakontrak1 namakontrak1 namakontrak1\",\"namaunit\":\"anamaunit1\",\"region\":\"region1\",\"stream\":\"st2\",\"durasi\":24,\"nilai\":1100000000,\"tglmulai\":\"1-01-2014\",\"tglberakhir\":\"1-01-2016\",\"namapickontrak\":\"namapickontrak1\",\"nohppickontrak\":\"0808080808\",\"emailpickontrak\":\"emailpickontrak@tgz.com\",\"nmvendorpemenang\":\"PT PEMENANG 1\",\"nmpicvendor\":\"nmpicvendor1\",\"nohppicvendor\":\"0808080808\",\"emailpicvendor\":\"emailpicvendor1@tgz.com\",\"direksi\":\"direksi1\",\"penandatangan\":\"penandatangan1\",\"kontrakawal\":\"\"}";

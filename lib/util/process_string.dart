@@ -105,27 +105,36 @@ class ProcessString {
   /*
   * ex: 2019-01-01
   * */
-  DateTime dateFromDbToDateTime(String tanggal) {
-    var tmp = tanggal.split('-');
-    if (tmp.length == 3) {
-      try {
-        int year = int.parse(tmp[0]);
-        int month = int.parse(tmp[1]);
-        int day = int.parse(tmp[2]);
+  // DateTime dateFromDbToDateTime1(String tanggal) {
+  //   var tmp = tanggal.split('-');
+  //   if (tmp.length == 3) {
+  //     try {
+  //       int year = int.parse(tmp[0]);
+  //       int month = int.parse(tmp[1]);
+  //       int day = int.parse(tmp[2]);
+  //
+  //       return DateTime(year, month, day);
+  //     } catch (e) {
+  //       //jika format salah, maka di set sekarang. ini dilakukan jika format salah
+  //       // tidak menyebabkan aplikasi force close, namun mengakibatkan anomali data
+  //
+  //       return DateTime.now();
+  //     }
+  //   } else {
+  //     //jika format salah, maka di set sekarang. ini dilakukan jika format salah
+  //     // tidak menyebabkan aplikasi force close, namun mengakibatkan anomali data
+  //
+  //     return DateTime.now();
+  //   }
+  // }
 
-        return DateTime(year, month, day);
-      } catch (e) {
-        //jika format salah, maka di set sekarang. ini dilakukan jika format salah
-        // tidak menyebabkan aplikasi force close, namun mengakibatkan anomali data
-
-        return DateTime.now();
-      }
-    } else {
-      //jika format salah, maka di set sekarang. ini dilakukan jika format salah
-      // tidak menyebabkan aplikasi force close, namun mengakibatkan anomali data
-
-      return DateTime.now();
-    }
+  /*
+  * input: 2020-09-01 15:39:29
+  * */
+  DateTime dateFromLongString(String longstring){
+    var tmp = longstring.split(' ');
+    var stgl = tmp[0];
+    return this.dateFromTextToDateTime(stgl);
   }
 
   /*

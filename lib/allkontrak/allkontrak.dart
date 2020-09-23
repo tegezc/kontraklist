@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:listkontrakapp/allkontrak/blocshowall.dart';
+import 'package:listkontrakapp/detailkontrak/detail_kontrak.dart';
 import 'package:listkontrakapp/kontrakeditor/kontrakeditor.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
@@ -318,7 +319,9 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
     await openPage(context, KontrakEditor.editmode(kontrak));
   }
 
-  void _handleViewDetail(int index, Kontrak kontrak) {}
+  void _handleViewDetail(int index, Kontrak kontrak)async {
+    await openPage(context, DetailKontrak(kontrak));
+  }
 
   void _handleShowDocument(int index, Kontrak kontrak) {}
 
