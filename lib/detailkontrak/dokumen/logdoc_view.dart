@@ -3,6 +3,7 @@ import 'package:listkontrakapp/detailkontrak/blocdetailkontrak.dart';
 import 'package:listkontrakapp/detailkontrak/dokumen/logdoceditor.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
+import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 import 'package:loading_animations/loading_animations.dart';
@@ -417,7 +418,3 @@ class _LogDokViewState extends State<LogDokView> {
   }
 }
 
-enum EnumFileDokumen {
-  pdf,
-  doc
-}

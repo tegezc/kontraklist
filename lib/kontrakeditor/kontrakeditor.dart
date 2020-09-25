@@ -5,6 +5,7 @@ import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 import 'package:listkontrakapp/util/process_string.dart';
+import 'package:listkontrakapp/util/validatortextfield.dart';
 import 'package:loading_animations/loading_animations.dart';
 
 class KontrakEditor extends StatefulWidget {
@@ -117,11 +118,12 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
   DateTime _dtBerakhir;
   ProcessString _processString;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _autoValidate = false;
+  AutovalidateMode _autoValidate = AutovalidateMode.disabled;
 
   Kontrak _resultKontrak;
   Kontrak _kontrakAwal;
 
+  ValidatorTextField _validatorTextField;
   @override
   void dispose() {
     _noKontrakTextController.dispose();
@@ -147,6 +149,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
   @override
   void initState() {
     _processString = new ProcessString();
+    _validatorTextField = ValidatorTextField();
     if (widget.enumStateEditor == EnumStateEditor.baru) {
       this._initBaru();
     } else {
@@ -219,7 +222,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: TextFormField(
-        autovalidate: _autoValidate,
+        autovalidateMode: _autoValidate,
         onSaved: (str){
           _saveValueField(tag,str);
         },
@@ -390,7 +393,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                     _actionLinkKontrakKlik),
               ],
             ),
-             _autoValidate?_validationOtherField():Container(),
+             _autoValidate == AutovalidateMode.onUserInteraction?_validationOtherField():Container(),
           ],
         ),
       ),
@@ -630,58 +633,6 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     }
   }
 
-  /// value tidak boleh null / kosong
-  String _validatorEmail(value) {
-    bool emailValid = RegExp(
-            r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-        .hasMatch(value);
-    if (emailValid) {
-      return null;
-    } else {
-      return 'Email tidak valid.';
-    }
-  }
-
-  /// value tidak boleh null / kosong
-  String _validatorMustNumber(String value) {
-    int val = int.tryParse(value);
-    if (val == null) {
-      return '* Harus angka positif.';
-    } else {
-      if (val < 0) {
-        return '* Harus angka positif.';
-      }
-    }
-
-    return null;
-  }
-
-  /// value tidak boleh null / kosong
-  String _validatorOnlyText(String value) {
-    bool emailValid = RegExp(r"^[a-zA-Z ]*$").hasMatch(value);
-    if (emailValid) {
-      return null;
-    } else {
-      return 'Harus text';
-    }
-  }
-
-  /// value tidak boleh null / kosong
-  String _validatorPhoneNumber(String value) {
-    if (value.length <= 15) {
-      bool phoneNumberValid =
-          RegExp(r"^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$")
-              .hasMatch(value);
-      if (phoneNumberValid) {
-        return null;
-      } else {
-        return 'Nomor kontak tidak valid.';
-      }
-    } else {
-      return 'Nomor kontak tidak valid.';
-    }
-  }
-
   void _actionBtnTglAwalKlik(BuildContext context) {
     _selectDate(context, true);
   }
@@ -702,34 +653,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
       if (value.length == 0) {
         return '*Field tidak boleh kosong.';
       } else {
-        switch (enumValidat) {
-          case EnumValidatorTextFieldForm.email:
-            {
-              return _validatorEmail(value);
-            }
-            break;
-          case EnumValidatorTextFieldForm.onlynumber:
-            {
-              return _validatorMustNumber(value);
-            }
-            break;
-          case EnumValidatorTextFieldForm.bebas:
-            {
-              return null;
-            }
-            break;
-          case EnumValidatorTextFieldForm.onlyText:
-            {
-              return _validatorOnlyText(value);
-            }
-            break;
-          case EnumValidatorTextFieldForm.phoneNumber:
-            {
-              return this._validatorPhoneNumber(value);
-            }
-            break;
-        }
-        return null;
+        return _validatorTextField.validator(enumValidat, value);
       }
     } else {
       // Baru
@@ -739,33 +663,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
         }
       }
       if (value.length > 0) {
-        switch (enumValidat) {
-          case EnumValidatorTextFieldForm.email:
-            {
-              return _validatorEmail(value);
-            }
-            break;
-          case EnumValidatorTextFieldForm.onlyText:
-            {
-              return _validatorOnlyText(value);
-            }
-            break;
-          case EnumValidatorTextFieldForm.onlynumber:
-            {
-              return _validatorMustNumber(value);
-            }
-            break;
-          case EnumValidatorTextFieldForm.bebas:
-            {
-              return null;
-            }
-            break;
-          case EnumValidatorTextFieldForm.phoneNumber:
-            {
-              return this._validatorPhoneNumber(value);
-            }
-            break;
-        }
+        return _validatorTextField.validator(enumValidat, value);
       }
 
       return null;
@@ -869,7 +767,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
       print(_resultKontrak.toJson());
     }else{
       setState(() {
-        _autoValidate = true;
+        _autoValidate = AutovalidateMode.onUserInteraction;
       });
     }
   }

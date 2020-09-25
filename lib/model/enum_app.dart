@@ -17,3 +17,8 @@ enum EnumTypeDashboard{
   hari90,hari180,hari360
 
 }
+
+enum EnumFileDokumen {
+  pdf,
+  doc
+}

@@ -301,6 +301,22 @@ class LogDokumen {
       @required this.linkPdf,
       this.linkDoc});
 
+  Map toJson() {
+    ProcessString processString = new ProcessString();
+    return {
+      TagJsonDok.fId:this.id,
+      TagJsonDok.fRealId:this.realId,
+      TagJsonDok.fNmReviewer:this.namaReviewer,
+      TagJsonDok.fKet:this.keterangan,
+      TagJsonDok.fTgl:this.tanggal==null?null:processString.dateToStringDdMmYyyy(this.tanggal),
+      TagJsonDok.fVersi:this.versi,
+      TagJsonDok.fJnsDok:this.jnsDoc,
+      TagJsonDok.fRealIdKontrak:this.realIdKontrak,
+      TagJsonDok.fLinkPdf:this.linkPdf,
+      TagJsonDok.fLinkDoc:this.linkDoc,
+    };
+  }
+
   LogDokumen.fromJson(Map<String, dynamic> json) {
     ProcessString processString = new ProcessString();
     this.id = int.parse(json[TagJsonDok.fId]);
@@ -320,6 +336,10 @@ class LogDokumen {
   String get strTanggal {
     ProcessString processString = new ProcessString();
     return processString.dateToStringDdMmmmYyyy(tanggal);
+  }
+
+  String toString(){
+    return '$id | $realId | $namaReviewer | $keterangan | $tanggal| $versi | $jnsDoc |$realIdKontrak| $linkPdf |$linkDoc';
   }
 
   // static List<LogDokumen> getDummyLog() {

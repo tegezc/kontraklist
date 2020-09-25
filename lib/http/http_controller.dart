@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'package:http/http.dart' as http;
 import 'package:listkontrakapp/model/kontrak.dart';
+import 'dart:async';
+import 'package:http_parser/http_parser.dart';
 
 class HttpAction {
   static const String keyHost = 'host';
@@ -35,7 +37,7 @@ class HttpAction {
   Future<Map<String, dynamic>> getDetailKontrak(Kontrak kontrak) async {
     try {
       // print(_host);
-      final response = await http.get( '$_host/kontraks/${kontrak.realID}');
+      final response = await http.get('$_host/kontraks/${kontrak.realID}');
       //print('masuk sini');
       if (response.statusCode == 200) {
         //print('masuk sini1');
@@ -72,13 +74,13 @@ class HttpAction {
     }
   }
 
-  Future<Map<String, dynamic>> downloadCsv(String contentcsv,String filename) async {
+  Future<Map<String, dynamic>> downloadCsv(
+      String contentcsv, String filename) async {
     // prepare
     final bytes = utf8.encode(contentcsv);
     final blob = html.Blob([bytes]);
     final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor =
-    html.document.createElement('a') as html.AnchorElement
+    final anchor = html.document.createElement('a') as html.AnchorElement
       ..href = url
       ..style.display = 'none'
       ..download = '$filename.csv';
@@ -90,7 +92,6 @@ class HttpAction {
     // cleanup
     html.document.body.children.remove(anchor);
     html.Url.revokeObjectUrl(url);
-
   }
 
   Future<Map<String, dynamic>> initialCreateKontrak() async {
@@ -122,7 +123,6 @@ class HttpAction {
   }
 
   Future<Map<String, dynamic>> deleteKontrak(Kontrak kontrak) async {
-
     final http.Response response = await http.delete(
       '$_host/kontraks/${kontrak.realID}',
       headers: <String, String>{
@@ -139,7 +139,6 @@ class HttpAction {
   }
 
   Future<Map<String, dynamic>> editKontrak(Kontrak kontrak) async {
-
     final http.Response response = await http.put(
       '$_host/kontraks/${kontrak.realID}',
       headers: <String, String>{
@@ -157,21 +156,60 @@ class HttpAction {
     }
   }
 
-  Future<Map<String, dynamic>> initialCreateDokumen(int idkontrak,String jnsdok)async{
+  Future<Map<String, dynamic>> initialCreateDokumen(
+      int idkontrak, String jnsdok) async {
     try {
-
-      final response = await http.get( '$_host/dokumen/$idkontrak/$jnsdok');
+      final response = await http.get('$_host/dokumen/$idkontrak/$jnsdok');
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-         print(response.body);
+        print(response.body);
         return null;
       }
     } catch (e) {
-    print(e.toString());
-    return null;
+      print(e.toString());
+      return null;
     }
   }
 
+  Future<bool> uploadDoc(LogDokumen logDokumen, List<int> _selectedFile,String ext) async {
+    print(_selectedFile.length);
+    var url = Uri.parse('$_host/upload');
+    var request = new http.MultipartRequest("POST", url);
+    request.fields['idkontrak'] = '${logDokumen.realIdKontrak}';
+    request.fields['type'] = '${logDokumen.jnsDoc}';
+    request.fields['versi'] = '${logDokumen.versi}';
+    request.fields['ext'] = ext;
+    request.files.add(http.MultipartFile.fromBytes('file', _selectedFile,
+        contentType: new MediaType('application', 'octet-stream'),
+        filename: "file_up"));
+
+    //http.StreamedResponse response = await request.send();
+    http.Response response = await http.Response.fromStream(await request.send());
+    print("Result: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+    return false;
+  }
+
+  Future<Map<String, dynamic>> createDokumen(LogDokumen logDokumen) async {
+
+    final http.Response response = await http.post(
+      '$_host/dokumen',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(logDokumen.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      print(response.body);
+      throw Exception('Failed to createContract.');
+    }
+  }
 }
