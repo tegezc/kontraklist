@@ -87,7 +87,9 @@ class BlocKontrakEditor {
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response = await httpAction.editKontrak(kontrak);
     if(response['id']!=null){
-      return true;
+      if(response['id']>0){
+        return true;
+      }
     }
     return false;
   }

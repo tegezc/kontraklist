@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:html' as html;
 import 'package:http/http.dart' as http;
+import 'dart:js' as js;
+import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'dart:async';
 import 'package:http_parser/http_parser.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HttpAction {
   static const String keyHost = 'host';
@@ -74,8 +77,7 @@ class HttpAction {
     }
   }
 
-  Future<Map<String, dynamic>> downloadCsv(
-      String contentcsv, String filename) async {
+  Future<void> downloadCsv(String contentcsv, String filename) async {
     // prepare
     final bytes = utf8.encode(contentcsv);
     final blob = html.Blob([bytes]);
@@ -173,12 +175,13 @@ class HttpAction {
     }
   }
 
-  Future<bool> uploadDoc(LogDokumen logDokumen, List<int> _selectedFile,String ext) async {
+  Future<bool> uploadDoc(
+      LogDokumen logDokumen, List<int> _selectedFile, String ext) async {
     print(_selectedFile.length);
     var url = Uri.parse('$_host/upload');
     var request = new http.MultipartRequest("POST", url);
     request.fields['idkontrak'] = '${logDokumen.realIdKontrak}';
-    request.fields['type'] = '${logDokumen.jnsDoc}';
+    request.fields['type'] = '${logDokumen.jnsDoc.code}';
     request.fields['versi'] = '${logDokumen.versi}';
     request.fields['ext'] = ext;
     request.files.add(http.MultipartFile.fromBytes('file', _selectedFile,
@@ -186,17 +189,21 @@ class HttpAction {
         filename: "file_up"));
 
     //http.StreamedResponse response = await request.send();
-    http.Response response = await http.Response.fromStream(await request.send());
+    http.Response response =
+        await http.Response.fromStream(await request.send());
     print("Result: ${response.body}");
 
     if (response.statusCode == 200) {
-      return true;
+      Map<String,dynamic> resp = json.decode(response.body);
+      if(resp['status'] !=null){
+        if(resp['status']==1)return true;
+      }
+      return false;
     }
     return false;
   }
 
   Future<Map<String, dynamic>> createDokumen(LogDokumen logDokumen) async {
-
     final http.Response response = await http.post(
       '$_host/dokumen',
       headers: <String, String>{
@@ -211,5 +218,53 @@ class HttpAction {
       print(response.body);
       throw Exception('Failed to createContract.');
     }
+  }
+
+  Future<Map<String, dynamic>> editDokumen(LogDokumen dokumen) async {
+    final http.Response response = await http.put(
+      '$_host/dokumen/${dokumen.realId}',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(dokumen.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      print(response.body);
+      return json.decode(response.body);
+    } else {
+      print(response.body);
+      throw Exception('Failed to createContract.');
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteDokumen(LogDokumen dokumen) async {
+    final http.Response response = await http.delete(
+      '$_host/dokumen/${dokumen.realId}',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      print(response.body);
+      throw Exception('Failed to createContract.');
+    }
+  }
+
+  Future<bool> downloadDoc(
+      int iddokumen, EnumFileDokumen enumFileDokumen) async {
+    String jnsFile = '';
+    if (enumFileDokumen == EnumFileDokumen.pdf) {
+      jnsFile = 'pdf';
+    } else if (enumFileDokumen == EnumFileDokumen.doc) {
+      jnsFile = 'doc';
+    } else {}
+    String param = '$iddokumen+$jnsFile';
+    String url = '$_host/download/$param';
+    print('url: $url');
+    js.context.callMethod("open", [url]);
   }
 }

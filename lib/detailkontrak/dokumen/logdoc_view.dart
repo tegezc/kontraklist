@@ -6,13 +6,16 @@ import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
-import 'package:loading_animations/loading_animations.dart';
+//import 'package:loading_animations/loading_animations.dart';
 
 class Expansionpanel extends StatefulWidget {
   final double width;
   final ItemDetailKontrak itemDetailKontrak;
+  final BlocDetailKontrak blocDetailKontrak;
 
-  Expansionpanel(this.width, this.itemDetailKontrak);
+
+  Expansionpanel(this.width, this.itemDetailKontrak,this.blocDetailKontrak);
+
 
   _Expansionpaneltate createState() => _Expansionpaneltate();
 }
@@ -29,50 +32,57 @@ class NewItem {
 class _Expansionpaneltate extends State<Expansionpanel> {
   List<NewItem> _items;
   ItemDetailKontrak _itemDetailKontrak;
+  BlocDetailKontrak _blocDetailKontrak;
 
   @override
   void initState() {
+    _blocDetailKontrak = widget.blocDetailKontrak;
     _itemDetailKontrak = widget.itemDetailKontrak;
-
+    JenisDokumen jnsdoc;
+   if(widget.itemDetailKontrak.specificExpanseByDoc==null){
+     jnsdoc = JenisDokumen(null);
+   }else{
+     jnsdoc = widget.itemDetailKontrak.specificExpanseByDoc;
+   }
     _items = <NewItem>[
       NewItem(
-          false, // isExpanded ?
+          jnsdoc.isPe(), // isExpanded ?
           'PE - Paket Enginering', // header
           Padding(
               padding: EdgeInsets.all(20.0),
-              child: LogDokView(_itemDetailKontrak.kontrak.realID,JenisDokumen.tagPe,_itemDetailKontrak.lpe, widget.width)), // body
+              child: LogDokView(_itemDetailKontrak,JenisDokumen.pe(),_itemDetailKontrak.lpe, widget.width,_blocDetailKontrak)), // body
           null // iconPic
       ),
       NewItem(
-          false, // isExpanded ?
+         jnsdoc.isTor(), // isExpanded ?
           'TOR - Term Of Reference', // header
           Padding(
               padding: EdgeInsets.all(20.0),
-              child: LogDokView(_itemDetailKontrak.kontrak.realID,JenisDokumen.tagTor,_itemDetailKontrak.ltor, widget.width)), // body
+              child: LogDokView(_itemDetailKontrak,JenisDokumen.tor(),_itemDetailKontrak.ltor, widget.width,_blocDetailKontrak)), // body
           null // iconPic
       ),
       NewItem(
-          false, // isExpanded ?
+          jnsdoc.isSt(), // isExpanded ?
           'Spec Teknis', // header
           Padding(
               padding: EdgeInsets.all(20.0),
-              child: LogDokView(_itemDetailKontrak.kontrak.realID,JenisDokumen.tagSt,_itemDetailKontrak.lst, widget.width)), // body
+              child: LogDokView(_itemDetailKontrak,JenisDokumen.st(),_itemDetailKontrak.lst, widget.width,_blocDetailKontrak)), // body
           null // iconPic
       ),
       NewItem(
-          false, // isExpanded ?
+          jnsdoc.isHps(), // isExpanded ?
           'OE / HPS', // header
           Padding(
               padding: EdgeInsets.all(20.0),
-              child: LogDokView(_itemDetailKontrak.kontrak.realID,JenisDokumen.tagHps,_itemDetailKontrak.lhps, widget.width)), // body
+              child: LogDokView(_itemDetailKontrak,JenisDokumen.hps(),_itemDetailKontrak.lhps, widget.width,_blocDetailKontrak)), // body
           null // iconPic
       ),
       NewItem(
-          false, // isExpanded ?
+          jnsdoc.isSp(), // isExpanded ?
           'SP - Surat Perjanjian', // header
           Padding(
               padding: EdgeInsets.all(20.0),
-              child: LogDokView(_itemDetailKontrak.kontrak.realID,JenisDokumen.tagSp,_itemDetailKontrak.lsp, widget.width)), // body
+              child: LogDokView(_itemDetailKontrak,JenisDokumen.sp(),_itemDetailKontrak.lsp, widget.width,_blocDetailKontrak)), // body
           null // iconPic
       )
     ];
@@ -112,12 +122,13 @@ class _Expansionpaneltate extends State<Expansionpanel> {
 }
 
 class LogDokView extends StatefulWidget {
-  final int idkontrak;
-  final String jnsdok;
+  final ItemDetailKontrak itemDetailKontrak;
+  final JenisDokumen jnsdok;
   final List<LogDokumen> ldoc;
   final double width;
+  final BlocDetailKontrak blocDetailKontrak;
 
-  LogDokView(this.idkontrak,this.jnsdok,this.ldoc, this.width);
+  LogDokView(this.itemDetailKontrak,this.jnsdok,this.ldoc, this.width,this.blocDetailKontrak);
 
   @override
   _LogDokViewState createState() => _LogDokViewState();
@@ -251,14 +262,14 @@ class _LogDokViewState extends State<LogDokView> {
                   onPressed: () {
                     this._handleViewDoc(EnumFileDokumen.pdf, element);
                   },
-                  child: Text('view PDF'),
+                  child: Text('Download PDF'),
                 ),
-                OutlineButton(
+                element.extDoc!=null?OutlineButton(
                   onPressed: () {
                     this._handleViewDoc(EnumFileDokumen.doc,element);
                   },
-                  child: Text('view Doc'),
-                ),
+                  child: Text('Download doc'),
+                ):Container(),
               ],
             ),
           ),
@@ -280,7 +291,7 @@ class _LogDokViewState extends State<LogDokView> {
             color: Colors.cyan[600],
             textColor: Colors.white,
             onPressed: () {
-              _handleDokumenBaru(widget.idkontrak,widget.jnsdok);
+              _handleDokumenBaru(widget.itemDetailKontrak.kontrak.realID,widget.jnsdok);
             },
           ),
           _ldocument.isNotEmpty
@@ -306,16 +317,30 @@ class _LogDokViewState extends State<LogDokView> {
     );
   }
   
-  void _handleEditDocumen(LogDokumen logDokumen){}
+  void _handleEditDocumen(LogDokumen logDokumen)async{
+    int result = await openPage(context, LogDocEditor.edit(logDokumen));
+    if(result != null){
+      if(result == 1){
+        widget.blocDetailKontrak.reloadFromInternet(logDokumen.jnsDoc);
+      }
+    }
+  }
   
   void _handleDeleteDokumen(LogDokumen logDokumen)async{
     await _showDialogConfirmDelete(context,logDokumen);
   }
 
-  void _handleViewDoc(EnumFileDokumen fileDokumen, LogDokumen kontrak) {}
+  void _handleViewDoc(EnumFileDokumen fileDokumen, LogDokumen dokumen) {
+     widget.blocDetailKontrak.downloadDokumen(dokumen.realId,fileDokumen);
+  }
 
-  void _handleDokumenBaru(int idkontrak,String jnsdok) async {
-    await openPage(context, LogDocEditor.baru(idkontrak, jnsdok));
+  void _handleDokumenBaru(int idkontrak,JenisDokumen jnsdok) async {
+    int result = await openPage(context, LogDocEditor.baru(idkontrak, jnsdok));
+    if(result != null){
+      if(result == 1){
+        widget.blocDetailKontrak.reloadFromInternet(jnsdok);
+      }
+    }
   }
 
   Future _showDialogConfirmDelete(BuildContext context,LogDokumen logDokumen) {
@@ -379,7 +404,45 @@ class _LogDokViewState extends State<LogDokView> {
         ));
   }
 
-  Future _loadingWaiting(BuildContext context,String text) {
+  // Future _loadingWaiting(BuildContext context,String text) {
+  //   return showDialog<String>(
+  //       context: context,
+  //       barrierDismissible: false,
+  //       builder: (BuildContext context) => SimpleDialog(
+  //         title: RichText(
+  //           text: TextSpan(
+  //             text: '$text ',
+  //             style: TextStyle(fontSize: 14,color: Colors.black),
+  //             children: <TextSpan>[
+  //               TextSpan(
+  //                 text: '\n',),
+  //             ],
+  //           ),
+  //         ),
+  //         //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+  //         shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.all(Radius.circular(10.0))),
+  //         children: <Widget>[
+  //           LoadingBouncingLine.circle(backgroundColor: Colors.deepOrange),
+  //         ],
+  //       ));
+  // }
+
+  void _confirmedDelete(LogDokumen logDokumen){
+    // this._loadingWaiting(context, 'Sedang menghapus data...');
+    widget.blocDetailKontrak.deleteDokumen(logDokumen).then((value) {
+      if(value){
+        /// success delete
+        widget.blocDetailKontrak.reloadFromInternet(logDokumen.jnsDoc);
+      }else{
+        /// gagal delete
+       this._infoError(context, 'Terjadi kesalalahan saat menghapus data');
+      }
+    });
+
+  }
+
+  Future _infoError(BuildContext context, String text) {
     return showDialog<String>(
         context: context,
         barrierDismissible: false,
@@ -387,10 +450,11 @@ class _LogDokViewState extends State<LogDokView> {
           title: RichText(
             text: TextSpan(
               text: '$text ',
-              style: TextStyle(fontSize: 14,color: Colors.black),
+              style: TextStyle(fontSize: 14, color: Colors.black),
               children: <TextSpan>[
                 TextSpan(
-                  text: '\n',),
+                  text: '\n',
+                ),
               ],
             ),
           ),
@@ -398,14 +462,28 @@ class _LogDokViewState extends State<LogDokView> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10.0))),
           children: <Widget>[
-            LoadingBouncingLine.circle(backgroundColor: Colors.deepOrange),
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Ok',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              ),
+            ),
           ],
         ));
-  }
-
-  void _confirmedDelete(LogDokumen logDokumen){
-   // this._loadingWaiting(context, 'Sedang menghapus data...');
-
   }
 
   Future openPage(context, Widget builder) async {

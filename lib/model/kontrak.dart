@@ -288,18 +288,16 @@ class LogDokumen {
   String keterangan;
   DateTime tanggal;
   int versi;
-  String jnsDoc;
+  JenisDokumen jnsDoc;
   int realIdKontrak;
-  String linkPdf;
-  String linkDoc;
+  String extDoc;
 
   LogDokumen(
       {@required this.namaReviewer,
       @required this.keterangan,
       @required this.tanggal,
       @required this.versi,
-      @required this.linkPdf,
-      this.linkDoc});
+      this.extDoc});
 
   Map toJson() {
     ProcessString processString = new ProcessString();
@@ -310,10 +308,9 @@ class LogDokumen {
       TagJsonDok.fKet:this.keterangan,
       TagJsonDok.fTgl:this.tanggal==null?null:processString.dateToStringDdMmYyyy(this.tanggal),
       TagJsonDok.fVersi:this.versi,
-      TagJsonDok.fJnsDok:this.jnsDoc,
+      TagJsonDok.fJnsDok:this.jnsDoc.code,
       TagJsonDok.fRealIdKontrak:this.realIdKontrak,
-      TagJsonDok.fLinkPdf:this.linkPdf,
-      TagJsonDok.fLinkDoc:this.linkDoc,
+      TagJsonDok.fextDoc:this.extDoc,
     };
   }
 
@@ -322,15 +319,14 @@ class LogDokumen {
     this.id = int.parse(json[TagJsonDok.fId]);
     this.realId = int.parse(json[TagJsonDok.fRealId]);
     this.keterangan = json[TagJsonDok.fKet];
-    this.namaReviewer = json[TagJsonDok.fId];
+    this.namaReviewer = json[TagJsonDok.fNmReviewer];
     this.tanggal = json[TagJsonDok.fTgl] == null
         ? null
         : processString.dateFromLongString(json[TagJsonDok.fTgl]);
     this.versi = int.parse(json[TagJsonDok.fVersi]);
-    this.jnsDoc = json[TagJsonDok.fJnsDok];
+    this.jnsDoc = JenisDokumen(json[TagJsonDok.fJnsDok]);
     this.realIdKontrak = int.parse(json[TagJsonDok.fRealIdKontrak]);
-    this.linkPdf = json[TagJsonDok.fLinkPdf];
-    this.linkDoc = json[TagJsonDok.fLinkDoc];
+    this.extDoc = json[TagJsonDok.fextDoc];
   }
 
   String get strTanggal {
@@ -339,7 +335,7 @@ class LogDokumen {
   }
 
   String toString(){
-    return '$id | $realId | $namaReviewer | $keterangan | $tanggal| $versi | $jnsDoc |$realIdKontrak| $linkPdf |$linkDoc';
+    return '$id | $realId | $namaReviewer | $keterangan | $tanggal| $versi | ${jnsDoc.code} |$realIdKontrak| $extDoc';
   }
 
   // static List<LogDokumen> getDummyLog() {

@@ -66,8 +66,7 @@ class TagJsonDok{
   static const String fVersi = 'versi';
   static const String fJnsDok = 'jenis_dok';
   static const String fRealIdKontrak = 'realid_kontrak';
-  static const String fLinkPdf = 'link_pdf';
-  static const String fLinkDoc = 'link_doc';
+  static const String fextDoc = 'doc';
 }
 
 class FieldJsonStream{
@@ -76,6 +75,22 @@ class FieldJsonStream{
 }
 
 class JenisDokumen{
+  String _jenisdoc;
+  JenisDokumen(this._jenisdoc);
+  JenisDokumen.pe():this._jenisdoc=tagPe;
+  JenisDokumen.tor():this._jenisdoc=tagTor;
+  JenisDokumen.st():this._jenisdoc=tagSt;
+  JenisDokumen.hps():this._jenisdoc=tagHps;
+  JenisDokumen.sp():this._jenisdoc=tagSp;
+  
+  String get code => _jenisdoc;
+
+  bool isPe()=>_jenisdoc==tagPe;
+  bool isTor()=>_jenisdoc==tagTor;
+  bool isSt()=>_jenisdoc==tagSt;
+  bool isHps()=>_jenisdoc==tagHps;
+  bool isSp()=>_jenisdoc==tagSp;
+
   static const String tagPe='pe';
   static const String tagTor='tor';
   static const String tagSt='st';

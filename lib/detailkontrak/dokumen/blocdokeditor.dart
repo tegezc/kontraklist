@@ -1,3 +1,5 @@
+import 'package:listkontrakapp/model/ConstantaApp.dart';
+import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:rxdart/subjects.dart';
 import 'dart:async';
@@ -13,28 +15,46 @@ class BlocDokumenEditor {
 
   Sink<ItemDokumenEditor> get itemdokumeneditorSink => _itemdokumeneditor.sink;
 
-  void firstimeBaru(int idkontrak, String jnsdok) {
+  void firstimeBaru(int idkontrak, JenisDokumen jnsdok) {
     this._initialFromInternet(idkontrak, jnsdok).then((versi) {
       LogDokumen logDokumen = new LogDokumen(
           namaReviewer: '',
           keterangan: '',
           tanggal: DateTime.now(),
-          versi: versi + 1,
-          linkPdf: '');
+          versi: versi + 1);
       logDokumen.realIdKontrak = idkontrak;
       logDokumen.jnsDoc = jnsdok;
-      logDokumen.linkDoc = '';
 
-      ItemDokumenEditor itemDokumenEditor = new ItemDokumenEditor(logDokumen);
+      ItemDokumenEditor itemDokumenEditor = new ItemDokumenEditor(logDokumen,EnumStateEditor.baru);
       this.itemdokumeneditorSink.add(itemDokumenEditor);
     });
   }
 
-  Future<int> _initialFromInternet(int idkontrak, String jnsdok) async {
+  void  firstimeEdit(LogDokumen logDokumen){
+    this._initialFromInternet(logDokumen.realIdKontrak, logDokumen.jnsDoc).then((versi) {
+      ItemDokumenEditor itemDokumenEditor = new ItemDokumenEditor(logDokumen,EnumStateEditor.edit);
+      this.itemdokumeneditorSink.add(itemDokumenEditor);
+    });
+  }
+
+
+  Future<int> _initialFromInternet(int idkontrak, JenisDokumen jnsdok) async {
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response =
-        await httpAction.initialCreateDokumen(idkontrak, jnsdok);
+        await httpAction.initialCreateDokumen(idkontrak, jnsdok.code);
     return response['maxversi'];
+  }
+
+
+  Future<bool> updateDokumen(LogDokumen logDokumen,)async{
+    HttpAction httpAction = new HttpAction();
+    Map<String, dynamic> response = await httpAction.editDokumen(logDokumen);
+    if(response['id']!=null){
+      if(response['id']>0){
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<bool> saveDokumen(LogDokumen logDokumen,List<int> filePdf,List<int> filedoc,String extdoc)async{
@@ -43,6 +63,7 @@ class BlocDokumenEditor {
       if(filedoc != null){
         bool uploaddoc = await this._saveFile(logDokumen, filedoc, extdoc);
         if(uploaddoc){
+          logDokumen.extDoc = extdoc;
           return await this._saveDokumen(logDokumen);
         }
       }else{
@@ -69,6 +90,12 @@ class BlocDokumenEditor {
     return false;
   }
 
+  Future<bool> downloadDokumen(int iddokumen,EnumFileDokumen enumFileDokumen)async{
+    HttpAction httpAction = new HttpAction();
+
+    return await httpAction.downloadDoc(iddokumen, enumFileDokumen);
+  }
+
   void dispose() {
     _itemdokumeneditor.close();
   }
@@ -76,6 +103,7 @@ class BlocDokumenEditor {
 
 class ItemDokumenEditor {
   LogDokumen logDokumen;
+  EnumStateEditor enumStateEditor;
 
-  ItemDokumenEditor(this.logDokumen);
+  ItemDokumenEditor(this.logDokumen,this.enumStateEditor);
 }

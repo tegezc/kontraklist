@@ -19,7 +19,7 @@ class LoadingNunggu extends StatelessWidget {
             children: [
               LoadingBouncingLine.circle(backgroundColor: Colors.deepOrange),
               Text(strContent, style: TextStyle(fontSize: 14,
-                  color: Colors.white,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold)),
             ],
           )),

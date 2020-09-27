@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:listkontrakapp/detailkontrak/dokumen/blocdokeditor.dart';
+import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
@@ -18,14 +19,17 @@ import 'package:loading_animations/loading_animations.dart';
 
 class LogDocEditor extends StatefulWidget {
   final int idkontrak;
-  final String jnsdok;
+  final JenisDokumen jnsdok;
   final EnumStateEditor enumStateEditor;
+  final LogDokumen logDokumen;
 
   LogDocEditor.baru(this.idkontrak, this.jnsdok,
-      {this.enumStateEditor = EnumStateEditor.baru});
+      {this.enumStateEditor = EnumStateEditor.baru, this.logDokumen});
 
-  LogDocEditor.edit(this.idkontrak, this.jnsdok,
-      {this.enumStateEditor = EnumStateEditor.edit});
+  LogDocEditor.edit(this.logDokumen,
+      {this.enumStateEditor = EnumStateEditor.edit,
+      this.jnsdok,
+      this.idkontrak});
 
   @override
   _LogDocEditorState createState() => _LogDocEditorState();
@@ -48,7 +52,9 @@ class _LogDocEditorState extends State<LogDocEditor> {
   void setupFirstime() {
     if (widget.enumStateEditor == EnumStateEditor.baru) {
       _blocDokumenEditor.firstimeBaru(widget.idkontrak, widget.jnsdok);
-    } else {}
+    } else {
+      _blocDokumenEditor.firstimeEdit(widget.logDokumen);
+    }
   }
 
   @override
@@ -56,18 +62,15 @@ class _LogDocEditorState extends State<LogDocEditor> {
     return StreamBuilder(
         stream: _blocDokumenEditor.itemdokumeneditorStream,
         builder: (context, snapshot) {
+          print(snapshot.connectionState);
           if (snapshot.hasError) {
             return ErrorPage();
           } else if (snapshot.hasData) {
             ItemDokumenEditor itemDokumenEditor = snapshot.data;
             return Scaffold(
-//      appBar: AppBar(
-//        title:Text(_title),
-//        backgroundColor: Colors.cyan,
-//      ),
               body: SingleChildScrollView(
                 child: LogDocEditorForm(
-                    itemDokumenEditor.logDokumen, _title, _blocDokumenEditor),
+                    itemDokumenEditor, _title, _blocDokumenEditor),
               ),
             );
           } else {
@@ -79,10 +82,10 @@ class _LogDocEditorState extends State<LogDocEditor> {
 
 class LogDocEditorForm extends StatefulWidget {
   final String title;
-  final LogDokumen logDokumen;
+  final ItemDokumenEditor itemDokumenEditor;
   final BlocDokumenEditor blocDokumenEditor;
 
-  LogDocEditorForm(this.logDokumen, this.title, this.blocDokumenEditor);
+  LogDocEditorForm(this.itemDokumenEditor, this.title, this.blocDokumenEditor);
 
   @override
   _LogDocEditorFormState createState() => _LogDocEditorFormState();
@@ -94,7 +97,8 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   final _versiController = TextEditingController();
   final Color colorButton = Colors.cyan[600];
   final Color colorTextBtn = Colors.white;
-  final TextStyle _stylePeringatan = TextStyle(fontSize: 12,fontStyle: FontStyle.italic,color: Colors.red);
+  final TextStyle _stylePeringatan =
+      TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.red);
 
   List<int> _selectedFilePdf;
   List<int> _selectedFileDoc;
@@ -120,6 +124,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
 
   @override
   void initState() {
+    print(widget.itemDokumenEditor.enumStateEditor);
     _processString = new ProcessString();
     _validatorTextField = ValidatorTextField();
     this._setupInit();
@@ -127,11 +132,13 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   }
 
   void _setupInit() {
-    _tanggal = widget.logDokumen.tanggal;
-    _keteranganTextController.text = widget.logDokumen.keterangan;
-    _namaTextController.text = widget.logDokumen.namaReviewer;
-    _versiController.text = '${widget.logDokumen.versi}';
-    _logDokumen = widget.logDokumen;
+
+    _logDokumen = widget.itemDokumenEditor.logDokumen;
+    print(_logDokumen.toString());
+    _tanggal = _logDokumen.tanggal;
+    _keteranganTextController.text = _logDokumen.keterangan;
+    _namaTextController.text = _logDokumen.namaReviewer;
+    _versiController.text = '${_logDokumen.versi}';
   }
 
   Widget _shortField(
@@ -165,8 +172,8 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
     );
   }
 
-  Widget _widgetLabelAndButtonVer(
-      String txtLabel, String txtBtn, double width, Function actionBtnClick) {
+  Widget _widgetLabelAndButtonVer(bool isEnable, String txtLabel, String txtBtn,
+      double width, Function actionBtnClick) {
     return Container(
       //    color: Colors.red,
       //    height: 120,
@@ -181,9 +188,11 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
               style: TextStyle(color: HexColor('5a5a5a')),
             ),
             OutlineButton(
-              onPressed: () {
-                actionBtnClick();
-              }, // actionBtnClick(),
+              onPressed: isEnable
+                  ? () {
+                      actionBtnClick();
+                    }
+                  : null, // actionBtnClick(),
               child: Text(txtBtn),
             ),
           ],
@@ -267,9 +276,9 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
     );
   }
 
-  Widget _cardDokumen(double width) {
+  Widget _cardDokumenBaru(double width) {
     String txtBerakhir =
-        _processString.dateToStringDdMmmYyyyShort(widget.logDokumen.tanggal);
+        _processString.dateToStringDdMmmYyyyShort(_logDokumen.tanggal);
     double w = width / 20;
     return Container(
       width: width,
@@ -287,17 +296,58 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
             SizedBox(
               height: 8,
             ),
-            _widgetLabelAndButtonVer('Tanggal:', txtBerakhir, w * 9, () {
+            _widgetLabelAndButtonVer(true, 'Tanggal:', txtBerakhir, w * 9, () {
               _actionBtnTglAkhirKlik(context);
             }),
             _widgetLabelAndButtonWajibVer('Dokumen PDF ', 'Browser', w * 9, () {
               _actionPickPdf(context);
             }),
-            _widgetLabelAndButtonVer('Dokumen DOC:', 'Browser', w * 9, () {
+            _widgetLabelAndButtonVer(true, 'Dokumen DOC:', 'Browser', w * 9,
+                () {
               _actionPickDoc(context);
             }),
+            _autoValidate == AutovalidateMode.onUserInteraction
+                ? this._validateFilePdf()
+                : Container(),
+          ],
+        ),
+      ),
+    );
+  }
 
-            _autoValidate==AutovalidateMode.onUserInteraction?this._validateFilePdf():Container(),
+  Widget _cardDokumenEdit(double width) {
+    String txtBerakhir =
+        _processString.dateToStringDdMmmYyyyShort(_logDokumen.tanggal);
+    double w = width / 20;
+    return Container(
+      width: width,
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _shortField('Keterangan', 5, EnumValidatorTextFieldForm.bebas,
+                _keteranganTextController),
+            _shortField('Nama Reviewer', 1, EnumValidatorTextFieldForm.onlyText,
+                _namaTextController),
+            _widgetLabelTextForm(
+                'Versi ( Angka otomatis, tidak dapat di rubah )',
+                _versiController),
+            SizedBox(
+              height: 8,
+            ),
+            _widgetLabelAndButtonVer(false, 'Tanggal:', txtBerakhir, w * 9, () {
+              _actionBtnTglAkhirKlik(context);
+            }),
+            _widgetLabelAndButtonVer(true, 'Dokumen PDF ', 'Download', w * 9,
+                () {
+              _actionDownload(context, EnumFileDokumen.pdf);
+            }),
+            widget.itemDokumenEditor.logDokumen.extDoc == null
+                ? Container()
+                : _widgetLabelAndButtonVer(
+                    true, 'Dokumen DOC:', 'Download', w * 9, () {
+                    _actionDownload(context, EnumFileDokumen.doc);
+                  }),
           ],
         ),
       ),
@@ -305,30 +355,35 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   }
 
   /// untuk validasi field selain textfield (combobox dan tanggal)
-  Widget _validateFilePdf(){
-
+  Widget _validateFilePdf() {
     /// validasi stream
-    bool isDocPdfFilled = _selectedFilePdf!=null;
+    bool isDocPdfFilled = _selectedFilePdf != null;
     return Padding(
-      padding: const EdgeInsets.only(top:30.0,bottom: 20),
+      padding: const EdgeInsets.only(top: 30.0, bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          isDocPdfFilled?Container():Padding(
-            padding: const EdgeInsets.only(left:8.0,right: 8),
-            child: Text('* Dokumen PDF wajib disertakan..',style:_stylePeringatan),
-          ),
+          isDocPdfFilled
+              ? Container()
+              : Padding(
+                  padding: const EdgeInsets.only(left: 8.0, right: 8),
+                  child: Text('* Dokumen PDF wajib disertakan..',
+                      style: _stylePeringatan),
+                ),
         ],
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     double width = mediaQueryData.size.width - 120;
     double widhtCardInternal = (width / 20) * 12;
+    String txtSubmit =
+        widget.itemDokumenEditor.enumStateEditor == EnumStateEditor.edit
+            ? 'Ubah'
+            : 'Simpan';
     return Padding(
       padding: const EdgeInsets.only(left: 60.0, right: 60.0),
       child: Form(
@@ -353,7 +408,11 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
                     style: Theme.of(context).textTheme.headline4),
               ),
             ),
-            Center(child: _cardDokumen(widhtCardInternal)),
+            Center(
+                child: widget.itemDokumenEditor.enumStateEditor ==
+                        EnumStateEditor.baru
+                    ? _cardDokumenBaru(widhtCardInternal)
+                    : _cardDokumenEdit(widhtCardInternal)),
             SizedBox(
               height: 30,
             ),
@@ -366,7 +425,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
                   onPressed: () {
                     _validateInputs();
                   },
-                  child: Text('Simpan'),
+                  child: Text(txtSubmit),
                 ),
                 SizedBox(
                   width: 50.0,
@@ -409,9 +468,9 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
     html.InputElement uploadInput = html.FileUploadInputElement();
     uploadInput.multiple = false;
     uploadInput.draggable = false;
-    if(enumFileDokumen == EnumFileDokumen.doc){
+    if (enumFileDokumen == EnumFileDokumen.doc) {
       uploadInput.accept = '.docx,.doc';
-    }else{
+    } else {
       uploadInput.accept = '.pdf';
     }
 
@@ -431,24 +490,23 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   }
 
   void _handleResult(Object result, html.File file) {
-
     String tmp = file.name.split('.').last;
 
     if (tmp == 'pdf') {
-      Uint8List _bytesData = Base64Decoder().convert(result.toString().split(",").last);
+      Uint8List _bytesData =
+          Base64Decoder().convert(result.toString().split(",").last);
       _selectedFilePdf = _bytesData;
       setState(() {
         _filenamepdf = file.name;
       });
-    }else if (tmp == 'doc' || tmp == 'docx'){
-      Uint8List _bytesData = Base64Decoder().convert(result.toString().split(",").last);
+    } else if (tmp == 'doc' || tmp == 'docx') {
+      Uint8List _bytesData =
+          Base64Decoder().convert(result.toString().split(",").last);
       _selectedFileDoc = _bytesData;
       setState(() {
         _filenamedoc = file.name;
       });
     }
-
-
   }
 
   void _actionBtnTglAkhirKlik(BuildContext context) {
@@ -461,6 +519,11 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
 
   void _actionPickDoc(BuildContext context) {
     _startWebFilePicker(EnumFileDokumen.doc);
+  }
+
+  _actionDownload(BuildContext context, EnumFileDokumen enumFileDokumen) {
+    widget.blocDokumenEditor.downloadDokumen(
+        widget.itemDokumenEditor.logDokumen.realId, enumFileDokumen);
   }
 
   void _textFieldOnSave() {
@@ -479,32 +542,57 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   }
 
   void _validateInputs() {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-      this._textFieldOnSave();
-      this._loadingWaiting(context, 'Sedang menyimpan data.');
-      if (_selectedFilePdf != null) {
-       String docext = '';
-        if(_selectedFileDoc!=null){
-          docext = _filenamedoc.split('.').last;
-        }
-
-        widget.blocDokumenEditor.saveDokumen(_logDokumen, _selectedFilePdf, _selectedFileDoc, docext).then((value) {
-          if(value){
-            // TODO: success
-          }else{
-            // TODO: gagal
+    if (widget.itemDokumenEditor.enumStateEditor == EnumStateEditor.baru) {
+      if (_formKey.currentState.validate()) {
+        _formKey.currentState.save();
+        this._textFieldOnSave();
+        this._loadingWaiting(context, 'Sedang menyimpan data.');
+        if (_selectedFilePdf != null) {
+          String docext = '';
+          if (_selectedFileDoc != null) {
+            docext = _filenamedoc.split('.').last;
           }
-        });
-      }else{
+
+          widget.blocDokumenEditor
+              .saveDokumen(
+                  _logDokumen, _selectedFilePdf, _selectedFileDoc, docext)
+              .then((value) {
+            Navigator.of(context).pop();
+            if (value) {
+              Navigator.of(context).pop(1);
+            } else {
+              this._infoError(context, 'Terjadi kesalahan ...');
+            }
+          });
+        } else {
+          setState(() {
+            _autoValidate = AutovalidateMode.onUserInteraction;
+          });
+        }
+      } else {
         setState(() {
           _autoValidate = AutovalidateMode.onUserInteraction;
         });
       }
     } else {
-      setState(() {
-        _autoValidate = AutovalidateMode.onUserInteraction;
-      });
+      if (_formKey.currentState.validate()) {
+        _formKey.currentState.save();
+        this._textFieldOnSave();
+        this._loadingWaiting(context, 'Sedang menyimpan data.');
+
+        widget.blocDokumenEditor.updateDokumen( _logDokumen,).then((value) {
+          Navigator.of(context).pop();
+          if (value) {
+            Navigator.of(context).pop(1);
+          } else {
+            this._infoError(context, 'Terjadi kesalahan ...');
+          }
+        });
+      } else {
+        setState(() {
+          _autoValidate = AutovalidateMode.onUserInteraction;
+        });
+      }
     }
   }
 

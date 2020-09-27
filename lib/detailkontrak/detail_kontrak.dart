@@ -48,97 +48,102 @@ class _DetailKontrakState extends State<DetailKontrak> {
             return ErrorPage();
           } else if (snapshot.hasData) {
             ItemDetailKontrak itemDetailKontrak = snapshot.data;
-            double width = MediaQuery.of(context).size.width / 20;
-            double widthtable = width * 19;
-            double widhtLog = width * 16;
-            return Scaffold(
-              body: Scrollbar(
-                controller: _scrollControllerUtama,
-                isAlwaysShown: true,
-                child: SingleChildScrollView(
+            if(itemDetailKontrak.enumLoadingStateDetKon == EnumLoadingStateDetKon.reload){
+              return LoadingNunggu('Sedang load data.');
+            }else{
+              double width = MediaQuery.of(context).size.width / 20;
+              double widthtable = width * 19;
+              double widhtLog = width * 16;
+              return Scaffold(
+                body: Scrollbar(
                   controller: _scrollControllerUtama,
-                  scrollDirection: Axis.vertical,
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 40.0, top: 20),
-                              child: FlatButton.icon(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  icon: Icon(Icons.keyboard_backspace),
-                                  label: Text('Kembali')),
-                            ),
-                            Spacer(),
-                          ],
-                        ),
-                        _header(),
-                        Card(
-                          child: Scrollbar(
-                            isAlwaysShown: true,
-                            controller: _scrollControllerTable,
-                            child: SingleChildScrollView(
+                  isAlwaysShown: true,
+                  child: SingleChildScrollView(
+                    controller: _scrollControllerUtama,
+                    scrollDirection: Axis.vertical,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Padding(
+                                padding:
+                                const EdgeInsets.only(left: 40.0, top: 20),
+                                child: FlatButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    icon: Icon(Icons.keyboard_backspace),
+                                    label: Text('Kembali')),
+                              ),
+                              Spacer(),
+                            ],
+                          ),
+                          _header(),
+                          Card(
+                            child: Scrollbar(
+                              isAlwaysShown: true,
                               controller: _scrollControllerTable,
-                              scrollDirection: Axis.horizontal,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 20),
-                                        child: RaisedButton(
-                                          onPressed: () {
-                                            _clickEditKontrak(itemDetailKontrak.kontrak);
-                                          },
-                                          color: Colors.cyan[600],
-                                          textColor: Colors.white,
-                                          child: Text('Edit'),
-                                        )),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Table2column(widget.kontrak, widthtable),
-                                    SizedBox(
-                                      height: 16,
-                                    ),
-                                    Table5column(widget.kontrak, widthtable),
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                    CardPICKontrak(widget.kontrak, widthtable),
-                                    SizedBox(
-                                      height: 16,
-                                    ),
-                                    CardVendor(widget.kontrak, widthtable),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                  ],
+                              child: SingleChildScrollView(
+                                controller: _scrollControllerTable,
+                                scrollDirection: Axis.horizontal,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                          padding:
+                                          const EdgeInsets.only(right: 20),
+                                          child: RaisedButton(
+                                            onPressed: () {
+                                              _clickEditKontrak(itemDetailKontrak.kontrak);
+                                            },
+                                            color: Colors.cyan[600],
+                                            textColor: Colors.white,
+                                            child: Text('Edit'),
+                                          )),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Table2column(widget.kontrak, widthtable),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                      Table5column(widget.kontrak, widthtable),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      CardPICKontrak(widget.kontrak, widthtable),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                      CardVendor(widget.kontrak, widthtable),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        Expansionpanel(widhtLog,itemDetailKontrak),
-                        SizedBox(
-                          height: 400,
-                        ),
-                      ],
+                          SizedBox(
+                            height: 30,
+                          ),
+                          Expansionpanel(widhtLog,itemDetailKontrak,_blocDetailKontrak),
+                          SizedBox(
+                            height: 400,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
+              );
+            }
+
           } else {
             return LoadingNunggu('Sedang load data.');
           }

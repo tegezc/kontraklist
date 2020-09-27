@@ -20,5 +20,6 @@ enum EnumTypeDashboard{
 
 enum EnumFileDokumen {
   pdf,
-  doc
+  doc,
+  excel
 }
