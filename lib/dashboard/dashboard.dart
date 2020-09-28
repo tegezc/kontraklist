@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:listkontrakapp/allkontrak/allkontrak.dart';
 import 'package:listkontrakapp/detailkontrak/detail_kontrak.dart';
 import 'package:listkontrakapp/http/http_controller.dart';
-import 'package:listkontrakapp/kontrakeditor/kontrakeditor.dart';
+import 'package:listkontrakapp/kontrakeditor/kontrakeditorcontroller.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
@@ -73,11 +73,15 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditor.baru());
+    await openPage(context, KontrakEditorController.baru(_callbackfinish));
   }
 
   void _clickTampilkansemua() async {
     await openPage(context, ShowAllKontrak());
+  }
+
+  void _callbackfinish(){
+    this._setupInit();
   }
 
   // Future<String> _saveSetting() async {

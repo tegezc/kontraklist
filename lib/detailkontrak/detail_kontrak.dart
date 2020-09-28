@@ -163,7 +163,12 @@ class _DetailKontrakState extends State<DetailKontrak> {
   }
 
   void _clickEditKontrak(Kontrak kontrak) async {
-    await openPage(context, KontrakEditor.editmode(kontrak));
+    int result = await openPage(context, KontrakEditor.editmode(null,kontrak));
+    if(result != null){
+      if(result == 1){
+        _blocDetailKontrak.reloadFromInternet(null);
+      }
+    }
   }
 
   Future openPage(context, Widget builder) async {

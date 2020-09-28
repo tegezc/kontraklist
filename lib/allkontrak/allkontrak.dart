@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:listkontrakapp/allkontrak/blocshowall.dart';
 import 'package:listkontrakapp/detailkontrak/detail_kontrak.dart';
 import 'package:listkontrakapp/kontrakeditor/kontrakeditor.dart';
+import 'package:listkontrakapp/kontrakeditor/kontrakeditorcontroller.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
@@ -289,7 +290,11 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditor.baru());
+    await openPage(context, KontrakEditorController.baru(_callbackfinish));
+  }
+
+  _callbackfinish(){
+    _blocShowAll.reloadFromInternet();
   }
 
   void _clickCell(
@@ -316,7 +321,7 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   }
 
   void _handleEdit(int index, Kontrak kontrak) async{
-    await openPage(context, KontrakEditor.editmode(kontrak));
+    await openPage(context, KontrakEditorController.editmode(_callbackfinish,kontrak));
   }
 
   void _handleViewDetail(int index, Kontrak kontrak)async {

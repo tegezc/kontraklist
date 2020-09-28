@@ -11,10 +11,11 @@ import 'package:loading_animations/loading_animations.dart';
 class KontrakEditor extends StatefulWidget {
   final EnumStateEditor enumStateEditor;
   final Kontrak kontrak;
+  final Function callbackFinish;
 
-  KontrakEditor.baru({this.enumStateEditor=EnumStateEditor.baru,this.kontrak});
+  KontrakEditor.baru(this.callbackFinish,{this.enumStateEditor=EnumStateEditor.baru,this.kontrak});
 
-  KontrakEditor.editmode(this.kontrak,{this.enumStateEditor=EnumStateEditor.edit});
+  KontrakEditor.editmode(this.callbackFinish,this.kontrak,{this.enumStateEditor=EnumStateEditor.edit});
 
   @override
   _KontrakEditorState createState() => _KontrakEditorState();
@@ -41,6 +42,10 @@ class _KontrakEditorState extends State<KontrakEditor> {
     super.dispose();
   }
 
+  void _callbackFinish(Kontrak kontrak){
+    widget.callbackFinish(kontrak);
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<ItemEditorKontrak>(
@@ -51,7 +56,7 @@ class _KontrakEditorState extends State<KontrakEditor> {
             return Scaffold(
               body: SingleChildScrollView(
                 child: Stack(children: <Widget>[
-                  KontrakEditorForm(_title, itemEditorKontrak,
+                  KontrakEditorForm(_callbackFinish,_title, itemEditorKontrak,
                       _blocKontrakEditor, widget.enumStateEditor,kontrak: widget.kontrak,),
                   itemEditorKontrak.isModeSearch
                       ? Positioned.fill(
@@ -78,8 +83,9 @@ class KontrakEditorForm extends StatefulWidget {
   final BlocKontrakEditor blocKontrakEditor;
   final EnumStateEditor enumStateEditor;
   final Kontrak kontrak;//jika edit mode, tidak boleh null
+  final Function callbackFinish;
 
-  KontrakEditorForm(this.title, this.itemEditorKontrak, this.blocKontrakEditor,
+  KontrakEditorForm(this.callbackFinish,this.title, this.itemEditorKontrak, this.blocKontrakEditor,
       this.enumStateEditor,{this.kontrak});
 
   @override
@@ -191,31 +197,31 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     _dropDownStream =
         _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
     _currentStream = _dropDownStream[0].value;
-   // _testOnly();
+    _testOnly();
   }
 
-  // void _testOnly(){
-  //   _currentStream = _dropDownStream[1].value;
-  //   _dtMulai = DateTime.now();
-  //   _dtBerakhir = DateTime(_dtMulai.year+2,_dtMulai.month,_dtMulai.day);
-  //   _noKontrakTextController.text = 'RR20200101SS';
-  //   _namaKontrakTextController.text = 'Pengadaan Aplikasi';
-  //   _unitTextController.text = 'Unit 1';
-  //   _anakPerusahaanTextController.text = 'PT Anak Nusantara';
-  //   _regionTextController.text = 'Region 1';
-  //   _durasiTextController.text = '24';
-  //   _nilaiKontrakTextController.text = '1000000000';
-  //   _nmPicKontrakTextController.text = 'Dermawan';
-  //   _noHpPicKontrakTextController.text = '081767876545';
-  //   _emailPicKontrakTextController.text = 'coba@coooo.com';
-  //   _nmVendorPemenangTextController.text = 'PT Vendor';
-  //   _nmPicVendorTextController.text = 'Asep';
-  //   _noHpPicVendorTextController.text = '081804378767';
-  //   _emailPicVendorTextController.text = 'coba@coba.com';
-  //   _direksiPekerjaanTextController.text = 'Direktur';
-  //   _penandaTanganKontrakTextController.text = 'Direktur';
-  //
-  // }
+  void _testOnly(){
+    _currentStream = _dropDownStream[1].value;
+    _dtMulai = DateTime.now();
+    _dtBerakhir = DateTime(_dtMulai.year+2,_dtMulai.month,_dtMulai.day);
+    _noKontrakTextController.text = 'RR20200101SS';
+    _namaKontrakTextController.text = 'Pengadaan Aplikasi';
+    _unitTextController.text = 'Unit 1';
+    _anakPerusahaanTextController.text = 'PT Anak Nusantara';
+    _regionTextController.text = 'Region 1';
+    _durasiTextController.text = '24';
+    _nilaiKontrakTextController.text = '1000000000';
+    _nmPicKontrakTextController.text = 'Dermawan';
+    _noHpPicKontrakTextController.text = '081767876545';
+    _emailPicKontrakTextController.text = 'coba@coooo.com';
+    _nmVendorPemenangTextController.text = 'PT Vendor';
+    _nmPicVendorTextController.text = 'Asep';
+    _noHpPicVendorTextController.text = '081804378767';
+    _emailPicVendorTextController.text = 'coba@coba.com';
+    _direksiPekerjaanTextController.text = 'Direktur';
+    _penandaTanganKontrakTextController.text = 'Direktur';
+
+  }
 
   Widget _shortField(String text, EnumValidatorTextFieldForm enumValidat,
       EnumFieldState enumFieldState, TextEditingController controller,int tag) {
@@ -742,10 +748,17 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
       _setValueOtherField();
       if(widget.enumStateEditor == EnumStateEditor.baru){
          this._loadingWaiting(context,'Sedang proses menyimpan data.');
-        widget.blocKontrakEditor.saveKontrak(_resultKontrak).then((value) {
+        widget.blocKontrakEditor.saveKontrak(_resultKontrak).then((k) {
+          print('masuk pak eko');
           Navigator.of(context).pop();
-          if(value){
-            //TODO:success goto detail kontrak
+          if(k != null){
+            /// nilai null berarti dari detail kontrak
+            if(widget.callbackFinish==null){
+              Navigator.of(context).pop(1);
+            }else{
+              print(k.toString());
+              widget.callbackFinish(k);
+            }
           }else{
             this._infoError(context, 'Terjadi kesalahan saat proses menyimpan data.');
           }
@@ -754,10 +767,16 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
       }else{
          this._loadingWaiting(context,'Sedang proses edit data.');
         print('masuk edit');
-        widget.blocKontrakEditor.editKontrak(_resultKontrak).then((value) {
+        widget.blocKontrakEditor.editKontrak(_resultKontrak).then((k) {
           Navigator.of(context).pop();
-          if(value){
-            //TODO: success edit goto detail kontrak
+          if(k!=null){
+            /// nilai null berarti dari detail kontrak
+            if(widget.callbackFinish==null){
+              Navigator.of(context).pop(1);
+            }else{
+              widget.callbackFinish(k);
+            }
+
           }else{
             this._infoError(context, 'Terjadi kesalahan saat proses edit data.');
           }

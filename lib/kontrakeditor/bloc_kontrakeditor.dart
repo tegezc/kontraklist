@@ -67,31 +67,23 @@ class BlocKontrakEditor {
     }
   }
 
-  Future<bool> saveKontrak(Kontrak kontrak)async{
-    // ItemEditorKontrak itemEditorKontrak = new ItemEditorKontrak(
-    //     _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Mohon tunggu, sedang menyimpan data.');
-    // this.itemkontrakeditorSink.add(itemEditorKontrak);
+  Future<Kontrak> saveKontrak(Kontrak kontrak)async{
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response = await httpAction.createKontrak(kontrak);
-    if(response['id']!=null){
-      return true;
+    if(response!=null){
+      return Kontrak.fromJson(response);
     }
-    // ItemEditorKontrak itemEditorKontrak1 = new ItemEditorKontrak(
-    //     _cacheStream, _cacheListKontrak,EStateKontrakEditor.finish, _cacheKontrak, false,true,textLoading: 'Terjadi kesalahan saat menyimpan data.');
-    // this.itemkontrakeditorSink.add(itemEditorKontrak1);
-    return false;
+    return null;
   }
 
-  Future<bool> editKontrak(Kontrak kontrak)async{
+  Future<Kontrak> editKontrak(Kontrak kontrak)async{
 
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response = await httpAction.editKontrak(kontrak);
-    if(response['id']!=null){
-      if(response['id']>0){
-        return true;
-      }
+    if(response!=null){
+      return Kontrak.fromJson(response);
     }
-    return false;
+    return null;
   }
 
   void showSearch() {

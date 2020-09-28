@@ -3,6 +3,7 @@ import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/util/process_string.dart';
 
 class Kontrak {
+  int id;
   int realID;
   String _noKontrak;
   String _nama;
@@ -51,6 +52,7 @@ class Kontrak {
 //      this._kontrakAwal);
 
   Kontrak.fromJson(Map<String, dynamic> json) {
+   
     DateTime dtmulai = json[DataJSONCons.fieldTglMulai] == null
         ? null
         : _processString
@@ -66,7 +68,11 @@ class Kontrak {
     int durasi = json[DataJSONCons.fieldDurasi] == null
         ? 0
         : int.parse(json[DataJSONCons.fieldDurasi]);
+    int idk = json[DataJSONCons.fieldId] == null
+        ? 0
+        : int.parse(json[DataJSONCons.fieldId]);
 
+    this.id =idk;
     this.realID = realid;
     this._noKontrak = json[DataJSONCons.fieldNoKontrak];
     this._nama = json[DataJSONCons.fieldNmKontrak];
@@ -242,6 +248,7 @@ class Kontrak {
 
   Map toJson() {
     return {
+      DataJSONCons.fieldId: id,
       DataJSONCons.fieldRealId: realID,
       DataJSONCons.fieldNoKontrak: _noKontrak,
       DataJSONCons.fieldNmKontrak: _nama,

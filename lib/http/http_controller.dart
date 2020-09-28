@@ -6,7 +6,6 @@ import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'dart:async';
 import 'package:http_parser/http_parser.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HttpAction {
   static const String keyHost = 'host';
@@ -73,6 +72,24 @@ class HttpAction {
       return json.decode(response.body);
     } else {
       print(response.body);
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> editKontrak(Kontrak kontrak) async {
+    final http.Response response = await http.put(
+      '$_host/kontraks/${kontrak.realID}',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(kontrak.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      print(response.body);
+      return json.decode(response.body);
+    } else {
+      print(response.body);
       throw Exception('Failed to createContract.');
     }
   }
@@ -133,24 +150,6 @@ class HttpAction {
     );
 
     if (response.statusCode == 201) {
-      return json.decode(response.body);
-    } else {
-      print(response.body);
-      throw Exception('Failed to createContract.');
-    }
-  }
-
-  Future<Map<String, dynamic>> editKontrak(Kontrak kontrak) async {
-    final http.Response response = await http.put(
-      '$_host/kontraks/${kontrak.realID}',
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(kontrak.toJson()),
-    );
-
-    if (response.statusCode == 201) {
-      print(response.body);
       return json.decode(response.body);
     } else {
       print(response.body);

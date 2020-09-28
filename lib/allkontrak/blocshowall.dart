@@ -54,6 +54,24 @@ class BlocShowAll {
     return itemShowAll;
   }
 
+  Future<void> reloadFromInternet() async {
+    if(_cacheAllListKontrak!=null){_cacheAllListKontrak.clear();}
+    HttpAction httpAction = new HttpAction();
+    Map<String, dynamic> response = await httpAction.getAllKontrak();
+    if (response != null) {
+      List<dynamic> ldk = response['kontrak'];
+      List<dynamic> lds = response['stream'];
+
+      ldk.forEach((element) {
+        Kontrak k = Kontrak.fromJson(element);
+        _cacheAllListKontrak.add(k);
+      });
+
+     this.filter();
+
+    }
+  }
+
   void reloadData() {
     ItemShowAll itemShowAll = new ItemShowAll(_cacheStream, _types,
         _listKontrak, EStateShowall.finish, _currentStream, _currentType);
