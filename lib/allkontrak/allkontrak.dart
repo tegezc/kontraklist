@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:listkontrakapp/allkontrak/blocshowall.dart';
 import 'package:listkontrakapp/detailkontrak/detail_kontrak.dart';
-import 'package:listkontrakapp/kontrakeditor/kontrakeditor.dart';
 import 'package:listkontrakapp/kontrakeditor/kontrakeditorcontroller.dart';
 import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
+import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
 import 'package:loading_animations/loading_animations.dart';
@@ -299,10 +299,10 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
 
   void _clickCell(
       EnumCallBackClickCell enumCallBackClickCell, int index, Kontrak kontrak) {
-    print('sampai kah');
+    
     switch (enumCallBackClickCell) {
-      case EnumCallBackClickCell.delete:
-        this._handleDelete(index, kontrak);
+      case EnumCallBackClickCell.berakhir:
+        this._handleBerakhir(index, kontrak);
         break;
       case EnumCallBackClickCell.edit:
         this._handleEdit(index, kontrak);
@@ -316,8 +316,10 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
     }
   }
 
-  void _handleDelete(int index, Kontrak kontrak) async {
-    await _showDialogConfirmDelete(context,kontrak);
+  void _handleBerakhir(int index, Kontrak kontrak) async {
+    bool isberakhir = false;
+    if(kontrak.flagberakhir==1)isberakhir=true;
+    await _showDialogConfirmBerakhir(context,kontrak,isberakhir);
   }
 
   void _handleEdit(int index, Kontrak kontrak) async{
@@ -328,21 +330,136 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
     await openPage(context, DetailKontrak(kontrak));
   }
 
-  void _handleShowDocument(int index, Kontrak kontrak) {}
+  void _handleShowDocument(int index, Kontrak kontrak) async{
+    _blocShowAll.checkSp(kontrak.realID).then((logdokumen) {
+      if(logdokumen == null){
+        this._showDialogSpNotExist(context);
+      }else{
+        this._showDialogConfirmDownload(context, logdokumen);
+      }
+    });
+  }
 
-  Future _showDialogConfirmDelete(BuildContext context,Kontrak kontrak) {
+  Future _showDialogConfirmDownload(BuildContext context,LogDokumen logDokumen) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: 'Apakah anda akan mendownload dokumen Sp terakhir ?',
+              style: TextStyle(fontSize: 14,color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                    text: '',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  _confirmDownload(logDokumen);
+                },
+                child: Text(
+                  'Ya',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              ),
+            ),
+          ],
+        ));
+  }
+
+  Future _showDialogSpNotExist(BuildContext context) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: 'Kontrak belum memiliki dokumen Sp. ',
+              style: TextStyle(fontSize: 14,color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                    text: '',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              ),
+            ),
+          ],
+        ));
+  }
+
+  Future _showDialogConfirmBerakhir(BuildContext context,Kontrak kontrak,bool isberakhir) {
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => SimpleDialog(
               title: RichText(
                 text: TextSpan(
-                  text: 'Apakah anda yakin akan menghapus kontrak ',
+                  text: 'Apakah anda yakin akan menandai kontrak  ',
                   style: TextStyle(fontSize: 14,color: Colors.black),
                   children: <TextSpan>[
                     TextSpan(
-                        text: kontrak.noKontrak==null?'?\n':'${kontrak.noKontrak}?\n',
+                        text: kontrak.noKontrak==null?'':'${kontrak.noKontrak}',
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: 'Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+                    TextSpan(text: isberakhir?' sebagai masih aktif?':' sebagai sudah berakhir?'),
                   ],
                 ),
               ),
@@ -360,7 +477,9 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
                         side: BorderSide(color: Colors.cyan)),
                     onPressed: () async {
                       Navigator.of(context).pop();
-                      _confirmedDelete(kontrak);
+                      int flagvalue;
+                      isberakhir?flagvalue=0:flagvalue=1;
+                      _confirmedBerakhir(kontrak,flagvalue);
                     },
                     child: Text(
                       'Ya',
@@ -419,14 +538,76 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
         ));
   }
 
-  void _confirmedDelete(kontrak){
-    this._loadingWaiting(context, 'Sedang menghapus data...');
-    _blocShowAll.deleteKontrak(kontrak).then((value) {
-      if(value){
-        Navigator.of(context).pop();
+  void _confirmedBerakhir(kontrak,int valueflag){
+    this._loadingWaiting(context, 'Merubah status kontrak ...');
+    _blocShowAll.editflagberakhirKontrak(kontrak,valueflag).then((value) {
+      Navigator.of(context).pop();
+      if(value!=null){
         _blocShowAll.reloadData();
+      }else{
+        this._infoError(context, 'Terjadi kesalahan saat mengupdate data.');
       }
     });
+  }
+  // void _confirmActifkanKontrak(Kontrak kontrak){
+  //   this._loadingWaiting(context, 'Mengakfirkan kembali kontrak...');
+  //   kontrak.setFlagBerakhir(0);
+  //   _blocShowAll.editflagberakhirKontrak(kontrak).then((value) {
+  //     Navigator.of(context).pop();
+  //     if(value!=null){
+  //       _blocShowAll.reloadData();
+  //     }else{
+  //       this._infoError(context, 'Terjadi kesalahan saat mengaktifkan kontrak.');
+  //     }
+  //   });
+  // }
+
+  void _confirmDownload(LogDokumen logDokumen){
+    _blocShowAll.downloadDokumen(logDokumen.realId,EnumFileDokumen.pdf);
+  }
+
+  Future _infoError(BuildContext context, String text) {
+    return showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: '$text ',
+              style: TextStyle(fontSize: 14, color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                  text: '\n',
+                ),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Ok',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              ),
+            ),
+          ],
+        ));
   }
 
   Future openPage(context, Widget builder) async {
@@ -468,14 +649,19 @@ class KontrakDataSourceTable extends DataTableSource {
   @override
   DataRow getRow(int index) {
     Kontrak k = lkontrak[index];
-
+    Widget icon;
+    if(k.flagberakhir==0){
+      icon = Icon(Icons.hourglass_empty_outlined);
+    }else{
+      icon = Icon(Icons.hourglass_disabled_outlined,color: Colors.red,);
+    }
     return DataRow.byIndex(index: index, cells: [
 //      DataCell(Text('Action delete / Edit'), showEditIcon: true,onTap: (){print('tap kolom action');}),
       DataCell(
         IconButton(
-            icon: Icon(Icons.delete_forever),
+            icon: icon,
             onPressed: () async {
-              this._clickCell(EnumCallBackClickCell.delete, index, k);
+              this._clickCell(EnumCallBackClickCell.berakhir, index, k);
             }),
       ),
       DataCell(Text(''), onTap: () {
@@ -489,7 +675,7 @@ class KontrakDataSourceTable extends DataTableSource {
 //     DataCell(Text('${k.region}')),
       DataCell(Text('${mapStream[k.stream]}')),
 //     DataCell(Text('${k.durasi}')),
-      DataCell(Text('${k.nilai}')),
+      DataCell(Text('${k.getFormatedNilai()}')),
       //    DataCell(Text('${k.strTglMulai}')),
       DataCell(Text('${k.strTglBerakhir}')),
 //     DataCell(Text('${k.nmPICKontrak}')),
@@ -550,4 +736,4 @@ class KontrakDataSourceTable extends DataTableSource {
   }
 }
 
-enum EnumCallBackClickCell { delete, edit, detail, nokontrak }
+enum EnumCallBackClickCell { berakhir, edit, detail, nokontrak }

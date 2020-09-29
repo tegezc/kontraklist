@@ -71,7 +71,6 @@ class HttpAction {
     if (response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      print(response.body);
       return null;
     }
   }
@@ -86,10 +85,8 @@ class HttpAction {
     );
 
     if (response.statusCode == 201) {
-      print(response.body);
       return json.decode(response.body);
     } else {
-      print(response.body);
       throw Exception('Failed to createContract.');
     }
   }
@@ -136,7 +133,6 @@ class HttpAction {
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
-      print(response.body);
       throw Exception('Failed get all kontrak');
     }
   }
@@ -152,7 +148,6 @@ class HttpAction {
     if (response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      print(response.body);
       throw Exception('Failed to createContract.');
     }
   }
@@ -162,6 +157,20 @@ class HttpAction {
     try {
       final response = await http.get('$_host/dokumen/$idkontrak/$jnsdok');
 
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> checkSp(int idkontrak) async {
+    try {
+      final response = await http.get('$_host/check/$idkontrak');
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
@@ -190,12 +199,11 @@ class HttpAction {
     //http.StreamedResponse response = await request.send();
     http.Response response =
         await http.Response.fromStream(await request.send());
-    print("Result: ${response.body}");
 
     if (response.statusCode == 200) {
-      Map<String,dynamic> resp = json.decode(response.body);
-      if(resp['status'] !=null){
-        if(resp['status']==1)return true;
+      Map<String, dynamic> resp = json.decode(response.body);
+      if (resp['status'] != null) {
+        if (resp['status'] == 1) return true;
       }
       return false;
     }
@@ -214,7 +222,6 @@ class HttpAction {
     if (response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      print(response.body);
       throw Exception('Failed to createContract.');
     }
   }
@@ -229,10 +236,8 @@ class HttpAction {
     );
 
     if (response.statusCode == 201) {
-      print(response.body);
       return json.decode(response.body);
     } else {
-      print(response.body);
       throw Exception('Failed to createContract.');
     }
   }
@@ -248,7 +253,6 @@ class HttpAction {
     if (response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      print(response.body);
       throw Exception('Failed to createContract.');
     }
   }
@@ -265,5 +269,6 @@ class HttpAction {
     String url = '$_host/download/$param';
     print('url: $url');
     js.context.callMethod("open", [url]);
+    return true;
   }
 }

@@ -48,9 +48,10 @@ class _DetailKontrakState extends State<DetailKontrak> {
             return ErrorPage();
           } else if (snapshot.hasData) {
             ItemDetailKontrak itemDetailKontrak = snapshot.data;
-            if(itemDetailKontrak.enumLoadingStateDetKon == EnumLoadingStateDetKon.reload){
+            if (itemDetailKontrak.enumLoadingStateDetKon ==
+                EnumLoadingStateDetKon.reload) {
               return LoadingNunggu('Sedang load data.');
-            }else{
+            } else {
               double width = MediaQuery.of(context).size.width / 20;
               double widthtable = width * 19;
               double widhtLog = width * 16;
@@ -69,7 +70,7 @@ class _DetailKontrakState extends State<DetailKontrak> {
                             children: [
                               Padding(
                                 padding:
-                                const EdgeInsets.only(left: 40.0, top: 20),
+                                    const EdgeInsets.only(left: 40.0, top: 20),
                                 child: FlatButton.icon(
                                     onPressed: () {
                                       Navigator.of(context).pop();
@@ -91,14 +92,16 @@ class _DetailKontrakState extends State<DetailKontrak> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
                                           padding:
-                                          const EdgeInsets.only(right: 20),
+                                              const EdgeInsets.only(right: 20),
                                           child: RaisedButton(
                                             onPressed: () {
-                                              _clickEditKontrak(itemDetailKontrak.kontrak);
+                                              _clickEditKontrak(
+                                                  itemDetailKontrak.kontrak);
                                             },
                                             color: Colors.cyan[600],
                                             textColor: Colors.white,
@@ -115,7 +118,8 @@ class _DetailKontrakState extends State<DetailKontrak> {
                                       SizedBox(
                                         height: 20,
                                       ),
-                                      CardPICKontrak(widget.kontrak, widthtable),
+                                      CardPICKontrak(
+                                          widget.kontrak, widthtable),
                                       SizedBox(
                                         height: 16,
                                       ),
@@ -132,7 +136,8 @@ class _DetailKontrakState extends State<DetailKontrak> {
                           SizedBox(
                             height: 30,
                           ),
-                          Expansionpanel(widhtLog,itemDetailKontrak,_blocDetailKontrak),
+                          Expansionpanel(
+                              widhtLog, itemDetailKontrak, _blocDetailKontrak),
                           SizedBox(
                             height: 400,
                           ),
@@ -143,7 +148,6 @@ class _DetailKontrakState extends State<DetailKontrak> {
                 ),
               );
             }
-
           } else {
             return LoadingNunggu('Sedang load data.');
           }
@@ -163,12 +167,16 @@ class _DetailKontrakState extends State<DetailKontrak> {
   }
 
   void _clickEditKontrak(Kontrak kontrak) async {
-    int result = await openPage(context, KontrakEditor.editmode(null,kontrak));
-    if(result != null){
-      if(result == 1){
-        _blocDetailKontrak.reloadFromInternet(null);
-      }
+    print('edit di klik');
+    int result = await openPage(context, KontrakEditor.editmode(_callback, kontrak,isfromdetail: true,));
+    if([1].contains(result)){
+      print('setelah di edit');
+      _blocDetailKontrak.reloadFromInternet(null);
     }
+  }
+
+  void _callback(Kontrak kontrak) {
+    print('callback di detail kontrak: ${kontrak.toString()}');
   }
 
   Future openPage(context, Widget builder) async {
@@ -489,11 +497,11 @@ class _Table5columnState extends State<Table5column> {
         ]),
         TableRow(children: [
           LabelDetailKontrakType2(
-              textContent: '${_kontrak.namaUnit} panjang jpanjang lalal'),
+              textContent: '${_kontrak.namaUnit}'),
           LabelDetailKontrakType2(textContent: _kontrak.region),
-          LabelDetailKontrakType2(textContent: _kontrak.stream),
+          LabelDetailKontrakType2(textContent: _kontrak.textStream),
           LabelDetailKontrakType2(textContent: '${_kontrak.durasi}'),
-          LabelDetailKontrakType2(textContent: '${_kontrak.nilai}'),
+          LabelDetailKontrakType2(textContent: '${_kontrak.getFormatedNilai()}'),
         ]),
         _forPadding(30.0),
 //        TableRow(children: [

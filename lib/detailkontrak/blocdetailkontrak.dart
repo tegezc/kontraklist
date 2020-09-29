@@ -8,6 +8,7 @@ import 'package:listkontrakapp/http/http_controller.dart';
 class BlocDetailKontrak {
 
   Kontrak _cacheKontrak;
+  Map<String,String> _cacheStream;
 
   final PublishSubject<ItemDetailKontrak> _itemDetailkontrak =
       PublishSubject<ItemDetailKontrak>();
@@ -18,6 +19,8 @@ class BlocDetailKontrak {
       _itemDetailkontrak.stream;
 
   void firstTime(Kontrak kontrak) async{
+
+     _cacheStream = Map();
     _cacheKontrak = kontrak;
     ItemDetailKontrak item = await this._processFromInternet(kontrak);
     this.itemDetailkontrakSink.add(item);
@@ -32,6 +35,12 @@ class BlocDetailKontrak {
     List<dynamic> lst = response[JenisDokumen.tagSt];
     List<dynamic> lhps = response[JenisDokumen.tagHps];
     List<dynamic> lsp = response[JenisDokumen.tagSp];
+    List<dynamic> lstream = response['stream'];
+
+    lstream.forEach((element) {
+      StreamKontrak streamKontrak = StreamKontrak.fromJson(element);
+      _cacheStream[streamKontrak.realId] = streamKontrak.nama;
+    });
 
     List<LogDokumen> ldpe = this._convertJsonToList(lpe);
     List<LogDokumen> ldtor = this._convertJsonToList(ltor);
@@ -39,6 +48,8 @@ class BlocDetailKontrak {
     List<LogDokumen> ldhps = this._convertJsonToList(lhps);
     List<LogDokumen> ldsp = this._convertJsonToList(lsp);
 
+    String textStream = _cacheStream[_cacheKontrak.stream];
+    _cacheKontrak.textStream = textStream;
   return new ItemDetailKontrak(kontrak, ldpe, ldtor, ldst, ldhps, ldsp,null,EnumLoadingStateDetKon.finish);
    
   }
@@ -61,6 +72,8 @@ class BlocDetailKontrak {
     List<LogDokumen> ldhps = this._convertJsonToList(lhps);
     List<LogDokumen> ldsp = this._convertJsonToList(lsp);
 
+    String textStream = _cacheStream[_cacheKontrak.stream];
+    _cacheKontrak.textStream = textStream;
     ItemDetailKontrak itemDetailKontrak =  new ItemDetailKontrak(_cacheKontrak, ldpe, ldtor, ldst, ldhps, ldsp,jnsdoc,EnumLoadingStateDetKon.finish);
     this.itemDetailkontrakSink.add(itemDetailKontrak);
 

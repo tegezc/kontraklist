@@ -80,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
     await openPage(context, ShowAllKontrak());
   }
 
-  void _callbackfinish(){
+  void _callbackfinish() {
     this._setupInit();
   }
 
@@ -140,22 +140,25 @@ class _DashboardState extends State<Dashboard> {
                   color: Colors.grey,
                 ),
               ),
-              Wrap(
-                direction: Axis.horizontal,
-                children: [
-                  entryAllKontrak.lkontrak90.isNotEmpty
-                      ? CardDashboard(
-                          EnumTypeDashboard.hari90, entryAllKontrak.lkontrak90)
-                      : Container(),
-                  entryAllKontrak.lKontrak180.isNotEmpty
-                      ? CardDashboard(EnumTypeDashboard.hari180,
-                          entryAllKontrak.lKontrak180)
-                      : Container(),
-                  entryAllKontrak.lKontrak360.isNotEmpty
-                      ? CardDashboard(EnumTypeDashboard.hari360,
-                          entryAllKontrak.lKontrak360)
-                      : Container(),
-                ],
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  children: [
+                    entryAllKontrak.lkontrak90.isNotEmpty
+                        ? CardDashboard(
+                            EnumTypeDashboard.hari90, entryAllKontrak.lkontrak90)
+                        : Container(),
+                    entryAllKontrak.lKontrak180.isNotEmpty
+                        ? CardDashboard(EnumTypeDashboard.hari180,
+                            entryAllKontrak.lKontrak180)
+                        : Container(),
+                    entryAllKontrak.lKontrak360.isNotEmpty
+                        ? CardDashboard(EnumTypeDashboard.hari360,
+                            entryAllKontrak.lKontrak360)
+                        : Container(),
+                  ],
+                ),
               ),
             ],
           ),
@@ -224,75 +227,71 @@ class _CardDashboardState extends State<CardDashboard> {
     super.initState();
   }
 
-  TableRow _headerTable() {
-    return TableRow(children: [
-      TableCell(
-          verticalAlignment: TableCellVerticalAlignment.middle,
-          child: Center(
-              child: Text(
-            'No Kontrak',
-            style: _titleStyle,
-          ))),
-      TableCell(
-          verticalAlignment: TableCellVerticalAlignment.middle,
-          child: Center(
-              child: Text(
-            'Nama Kontrak',
-            style: _titleStyle,
-          ))),
-      TableCell(
-          verticalAlignment: TableCellVerticalAlignment.middle,
-          child: Center(
-              child: Column(
-            children: [
-              Text(
-                'Tanggal',
-                style: _titleStyle,
-              ),
-              Text(
-                'Berakhir',
-                style: _titleStyle,
-              )
-            ],
-          ))),
-    ]);
+  List<DataColumn> _headerTable() {
+    List<DataColumn> ldc = new List();
+    ldc.add(DataColumn(
+        label: Center(
+            child: Text(
+      'No Kontrak',
+      style: _titleStyle,
+    ))));
+
+    ldc.add(DataColumn(
+        label: Center(
+            child: Text(
+      'Nama Kontrak',
+      style: _titleStyle,
+    ))));
+
+    ldc.add(DataColumn(
+        label: Center(
+            child: Column(
+      children: [
+        Text(
+          'Tanggal',
+          style: _titleStyle,
+        ),
+        Text(
+          'Berakhir',
+          style: _titleStyle,
+        )
+      ],
+    ))));
+    return ldc;
   }
 
-  TableRow _contentTable(Kontrak kontrak) {
-    return TableRow(children: [
-      _textNoDanTanggal(kontrak.noKontrak, kontrak),
-      _textContentJudul(kontrak.nama, kontrak),
-      _textNoDanTanggal(kontrak.strTglBerakhir, kontrak),
-    ]);
+  DataRow _contentTable(Kontrak kontrak) {
+    return DataRow(
+      onSelectChanged: (bool selected) async {
+        if (selected) {
+          await openPage(context, DetailKontrak(kontrak));
+        }
+      },
+      cells: <DataCell>[
+        DataCell(_textNoDanTanggal(kontrak.noKontrak, kontrak)),
+        DataCell(_textContentJudul(kontrak.nama, kontrak)),
+        DataCell(_textNoDanTanggal(kontrak.strTglBerakhir, kontrak)),
+      ],
+    );
   }
 
   Widget _textContentJudul(String text, Kontrak kontrak) {
     String tmpText = text == null ? '' : text;
-    return TableCell(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(tmpText, style: _titleStyleContent),
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(tmpText, style: _titleStyleContent),
     );
   }
 
   Widget _textNoDanTanggal(String text, Kontrak kontrak) {
     String tmpText = text == null ? '' : text;
-    return TableCell(
-      verticalAlignment: TableCellVerticalAlignment.middle,
-      child: InkWell(
-          onTap: () async {
-            await openPage(context, DetailKontrak(kontrak));
-          },
-          child: Center(child: Text(tmpText, style: _titleStyleContent))),
-    );
+    return Center(child: Text(tmpText, style: _titleStyleContent));
   }
 
-  List<TableRow> _table(List<Kontrak> lk) {
-    List<TableRow> lrow = new List();
-    lrow.add(this._headerTable());
-    int estimateRowCount = _page*10;
-    int rowCount = estimateRowCount>lk.length?lk.length:estimateRowCount;
+  List<DataRow> _table(List<Kontrak> lk) {
+    List<DataRow> lrow = new List();
+    int estimateRowCount = _page * 10;
+    int rowCount = estimateRowCount > lk.length ? lk.length : estimateRowCount;
     for (int i = 0; i < rowCount; i++) {
       lrow.add(this._contentTable(lk[i]));
     }
@@ -301,7 +300,7 @@ class _CardDashboardState extends State<CardDashboard> {
 
   Widget _cardKontrak(List<Kontrak> lkon, double width) {
     bool ismorevisible = false;
-    if(lkon.length>_page*10){
+    if (lkon.length > _page * 10) {
       ismorevisible = true;
     }
     return Card(
@@ -323,28 +322,27 @@ class _CardDashboardState extends State<CardDashboard> {
                   ),
                 ),
               ),
-              SizedBox(height: 5,),
-              Table(
-                border: TableBorder.symmetric(),
-                columnWidths: {
-                  0: FlexColumnWidth(1),
-                  1: FlexColumnWidth(2),
-                  2: FlexColumnWidth(1),
-                },
-                children: this._table(lkon),
+              SizedBox(
+                height: 5,
               ),
-              ismorevisible?SizedBox(
-                width: double.infinity,
-                child: RaisedButton(
-                  onPressed: () {
-
-                    setState(() {
-                      _page++;
-                    });
-                  },
-                  child: Text('more...'),
-                ),
-              ):Container(),
+              DataTable(
+                showCheckboxColumn: false,
+                columns: this._headerTable(),
+                rows: this._table(lkon),
+              ),
+              ismorevisible
+                  ? SizedBox(
+                      width: double.infinity,
+                      child: RaisedButton(
+                        onPressed: () {
+                          setState(() {
+                            _page++;
+                          });
+                        },
+                        child: Text('more...'),
+                      ),
+                    )
+                  : Container(),
             ],
           ),
         ),
@@ -356,6 +354,9 @@ class _CardDashboardState extends State<CardDashboard> {
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     double width = (mediaQueryData.size.width - 120) / 3;
+    if(width<400){
+      width = 400;
+    }
     List<Kontrak> lkontrak = widget.lkontrak;
     return _cardKontrak(lkontrak, width);
   }

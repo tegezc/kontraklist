@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/util/process_string.dart';
+import 'package:intl/intl.dart';
 
 class Kontrak {
   int id;
@@ -25,6 +26,9 @@ class Kontrak {
   String _direksi;
   String _penandatangan;
   String _kontrakAwal;
+  int _flagberakhir;
+
+  String textStream;
 
   Kontrak.kosong();
 
@@ -52,7 +56,6 @@ class Kontrak {
 //      this._kontrakAwal);
 
   Kontrak.fromJson(Map<String, dynamic> json) {
-   
     DateTime dtmulai = json[DataJSONCons.fieldTglMulai] == null
         ? null
         : _processString
@@ -72,7 +75,11 @@ class Kontrak {
         ? 0
         : int.parse(json[DataJSONCons.fieldId]);
 
-    this.id =idk;
+    int flag = json[DataJSONCons.fieldFlagBerakhir] == null
+        ? 0
+        : int.parse(json[DataJSONCons.fieldFlagBerakhir]);
+
+    this.id = idk;
     this.realID = realid;
     this._noKontrak = json[DataJSONCons.fieldNoKontrak];
     this._nama = json[DataJSONCons.fieldNmKontrak];
@@ -94,6 +101,7 @@ class Kontrak {
     this._direksi = json[DataJSONCons.fieldDireksi];
     this._penandatangan = json[DataJSONCons.fieldPenandatangan];
     this._kontrakAwal = json[DataJSONCons.fieldKontrakAwal];
+    this._flagberakhir = flag;
   }
 
   ProcessString _processString = new ProcessString();
@@ -137,6 +145,14 @@ class Kontrak {
   String get penandatangan => _penandatangan;
 
   String get kontrakAwal => _kontrakAwal;
+
+  int get flagberakhir => _flagberakhir;
+
+  String getFormatedNilai() {
+    final oCcy = new NumberFormat("#,##0", "idr");
+
+    return "Rp ${oCcy.format(this.nilai)},-";
+  }
 
   void setnoKontrak(String value) {
     _noKontrak = value;
@@ -234,6 +250,10 @@ class Kontrak {
     _kontrakAwal = value;
   }
 
+  void setFlagBerakhir(int i ){
+    this._flagberakhir = i;
+  }
+
   String get strTglMulai {
     return _tglMulai == null
         ? ''
@@ -271,14 +291,15 @@ class Kontrak {
       DataJSONCons.fieldEmailPicVendor: _emailPICVendor,
       DataJSONCons.fieldDireksi: _direksi,
       DataJSONCons.fieldPenandatangan: _penandatangan,
-      DataJSONCons.fieldKontrakAwal: _kontrakAwal
+      DataJSONCons.fieldKontrakAwal: _kontrakAwal,
+      DataJSONCons.fieldFlagBerakhir: _flagberakhir
     };
   }
 
   String toContentCsv() {
     return '$_noKontrak;$_nama;$_namaUnit;$_anakPerusahaan;$_region;$_durasi;$_nilai;$_stream'
         ';$_tglMulai;$_tglBerakhir;$_nmPICKontrak;$_noHpPICKontrak;$_emailPICKontrak;$_nmVendor'
-        ';$_nmPICVendor;$_noHpPICVendor;$_emailPICVendor;$_direksi;$_penandatangan;$_kontrakAwal';
+        ';$_nmPICVendor;$_noHpPICVendor;$_emailPICVendor;$_direksi;$_penandatangan;$_kontrakAwal;$_flagberakhir';
   }
 
   String toString() {
@@ -309,15 +330,17 @@ class LogDokumen {
   Map toJson() {
     ProcessString processString = new ProcessString();
     return {
-      TagJsonDok.fId:this.id,
-      TagJsonDok.fRealId:this.realId,
-      TagJsonDok.fNmReviewer:this.namaReviewer,
-      TagJsonDok.fKet:this.keterangan,
-      TagJsonDok.fTgl:this.tanggal==null?null:processString.dateToStringDdMmYyyy(this.tanggal),
-      TagJsonDok.fVersi:this.versi,
-      TagJsonDok.fJnsDok:this.jnsDoc.code,
-      TagJsonDok.fRealIdKontrak:this.realIdKontrak,
-      TagJsonDok.fextDoc:this.extDoc,
+      TagJsonDok.fId: this.id,
+      TagJsonDok.fRealId: this.realId,
+      TagJsonDok.fNmReviewer: this.namaReviewer,
+      TagJsonDok.fKet: this.keterangan,
+      TagJsonDok.fTgl: this.tanggal == null
+          ? null
+          : processString.dateToStringDdMmYyyy(this.tanggal),
+      TagJsonDok.fVersi: this.versi,
+      TagJsonDok.fJnsDok: this.jnsDoc.code,
+      TagJsonDok.fRealIdKontrak: this.realIdKontrak,
+      TagJsonDok.fextDoc: this.extDoc,
     };
   }
 
@@ -341,46 +364,46 @@ class LogDokumen {
     return processString.dateToStringDdMmmmYyyy(tanggal);
   }
 
-  String toString(){
+  String toString() {
     return '$id | $realId | $namaReviewer | $keterangan | $tanggal| $versi | ${jnsDoc.code} |$realIdKontrak| $extDoc';
   }
 
-  // static List<LogDokumen> getDummyLog() {
-  //   return <LogDokumen>[
-  //     LogDokumen(
-  //       namaReviewer: "Captain America",
-  //       keterangan: "Shield",
-  //       tanggal: DateTime.now(),
-  //       versi: 1,
-  //       linkPdf: 'link ke pdf',
-  //       linkDoc: 'linkkedoc',
-  //     ),
-  //     LogDokumen(
-  //       namaReviewer: "Captain America",
-  //       keterangan: "Shield",
-  //       tanggal: DateTime.now(),
-  //       versi: 2,
-  //       linkPdf: 'link ke pdf',
-  //       linkDoc: 'linkkedoc',
-  //     ),
-  //     LogDokumen(
-  //       namaReviewer: "Captain America",
-  //       keterangan: "Shield",
-  //       tanggal: DateTime.now(),
-  //       versi: 3,
-  //       linkPdf: 'link ke pdf',
-  //       linkDoc: 'linkkedoc',
-  //     ),
-  //     LogDokumen(
-  //       namaReviewer: "Captain America",
-  //       keterangan: "Shield",
-  //       tanggal: DateTime.now(),
-  //       versi: 4,
-  //       linkPdf: 'link ke pdf',
-  //       linkDoc: 'linkkedoc',
-  //     )
-  //   ];
-  // }
+// static List<LogDokumen> getDummyLog() {
+//   return <LogDokumen>[
+//     LogDokumen(
+//       namaReviewer: "Captain America",
+//       keterangan: "Shield",
+//       tanggal: DateTime.now(),
+//       versi: 1,
+//       linkPdf: 'link ke pdf',
+//       linkDoc: 'linkkedoc',
+//     ),
+//     LogDokumen(
+//       namaReviewer: "Captain America",
+//       keterangan: "Shield",
+//       tanggal: DateTime.now(),
+//       versi: 2,
+//       linkPdf: 'link ke pdf',
+//       linkDoc: 'linkkedoc',
+//     ),
+//     LogDokumen(
+//       namaReviewer: "Captain America",
+//       keterangan: "Shield",
+//       tanggal: DateTime.now(),
+//       versi: 3,
+//       linkPdf: 'link ke pdf',
+//       linkDoc: 'linkkedoc',
+//     ),
+//     LogDokumen(
+//       namaReviewer: "Captain America",
+//       keterangan: "Shield",
+//       tanggal: DateTime.now(),
+//       versi: 4,
+//       linkPdf: 'link ke pdf',
+//       linkDoc: 'linkkedoc',
+//     )
+//   ];
+// }
 }
 
 class StreamKontrak {
