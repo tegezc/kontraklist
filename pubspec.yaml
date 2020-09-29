@@ -24,6 +24,7 @@ dependencies:
   loading_animations: "^2.1.0"
   http: ^0.12.2
   rxdart: ^0.24.1
+  intl: ^0.16.1
   flutter:
     sdk: flutter
 
