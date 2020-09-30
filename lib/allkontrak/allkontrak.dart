@@ -290,10 +290,14 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditorController.baru(_callbackfinish));
+    await openPage(context, KontrakEditorController.baru(_callbackFromDetail,_callbackfinish));
   }
 
   _callbackfinish(){
+    _blocShowAll.reloadFromInternet();
+  }
+
+  _callbackFromDetail(){
     _blocShowAll.reloadFromInternet();
   }
 
@@ -323,11 +327,11 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
   }
 
   void _handleEdit(int index, Kontrak kontrak) async{
-    await openPage(context, KontrakEditorController.editmode(_callbackfinish,kontrak));
+    await openPage(context, KontrakEditorController.editmode(_callbackFromDetail,_callbackfinish,kontrak));
   }
 
   void _handleViewDetail(int index, Kontrak kontrak)async {
-    await openPage(context, DetailKontrak(kontrak));
+    await openPage(context, DetailKontrak(_callbackFromDetail,kontrak));
   }
 
   void _handleShowDocument(int index, Kontrak kontrak) async{

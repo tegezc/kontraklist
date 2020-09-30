@@ -73,7 +73,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditorController.baru(_callbackfinish));
+    await openPage(context, KontrakEditorController.baru(_callbackFromDetail,_callbackfinish));
   }
 
   void _clickTampilkansemua() async {
@@ -81,6 +81,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _callbackfinish() {
+    print('masuk sini _callbackfinish');
     this._setupInit();
   }
 
@@ -107,6 +108,11 @@ class _DashboardState extends State<Dashboard> {
     return await Navigator.of(context).push(
       MaterialPageRoute(builder: (ctx) => builder),
     );
+  }
+
+  _callbackFromDetail() {
+    print('masuk sini _callbackFromDetail');
+    this._setupInit();
   }
 
   Widget _scaffoldPage(EntryAllKontrak entryAllKontrak) {
@@ -145,18 +151,18 @@ class _DashboardState extends State<Dashboard> {
                 child: Wrap(
                   direction: Axis.horizontal,
                   children: [
-                    entryAllKontrak.lkontrak90.isNotEmpty
-                        ? CardDashboard(
-                            EnumTypeDashboard.hari90, entryAllKontrak.lkontrak90)
-                        : Container(),
-                    entryAllKontrak.lKontrak180.isNotEmpty
-                        ? CardDashboard(EnumTypeDashboard.hari180,
-                            entryAllKontrak.lKontrak180)
-                        : Container(),
-                    entryAllKontrak.lKontrak360.isNotEmpty
-                        ? CardDashboard(EnumTypeDashboard.hari360,
-                            entryAllKontrak.lKontrak360)
-                        : Container(),
+                   CardDashboard(
+                            _callbackFromDetail,
+                            EnumTypeDashboard.hari90,
+                            entryAllKontrak.lkontrak90),
+                    CardDashboard(
+                            _callbackFromDetail,
+                            EnumTypeDashboard.hari180,
+                            entryAllKontrak.lKontrak180),
+                    CardDashboard(
+                            _callbackFromDetail,
+                            EnumTypeDashboard.hari360,
+                            entryAllKontrak.lKontrak360),
                   ],
                 ),
               ),
@@ -172,11 +178,11 @@ class _DashboardState extends State<Dashboard> {
     if (_entryAllKontrak == null) {
       return LoadingNunggu('Sedang mengambil data...');
     } else {
-      if (_entryAllKontrak.isHasData()) {
+     // if (_entryAllKontrak.isHasData()) {
         return _scaffoldPage(_entryAllKontrak);
-      } else {
-        return BelumAdaData();
-      }
+      // } else {
+      //   return BelumAdaData();
+      // }
     }
   }
 }
@@ -184,8 +190,10 @@ class _DashboardState extends State<Dashboard> {
 class CardDashboard extends StatefulWidget {
   final EnumTypeDashboard enumTypeDashboard;
   final List<Kontrak> lkontrak;
+  final Function callbackFromDetail;
 
-  CardDashboard(this.enumTypeDashboard, this.lkontrak, {Key key})
+  CardDashboard(this.callbackFromDetail, this.enumTypeDashboard, this.lkontrak,
+      {Key key})
       : super(key: key);
 
   @override
@@ -227,6 +235,10 @@ class _CardDashboardState extends State<CardDashboard> {
     super.initState();
   }
 
+  _callbackFromDetail() {
+    widget.callbackFromDetail();
+  }
+
   List<DataColumn> _headerTable() {
     List<DataColumn> ldc = new List();
     ldc.add(DataColumn(
@@ -264,7 +276,7 @@ class _CardDashboardState extends State<CardDashboard> {
     return DataRow(
       onSelectChanged: (bool selected) async {
         if (selected) {
-          await openPage(context, DetailKontrak(kontrak));
+          await openPage(context, DetailKontrak(_callbackFromDetail, kontrak));
         }
       },
       cells: <DataCell>[
@@ -293,7 +305,10 @@ class _CardDashboardState extends State<CardDashboard> {
     int estimateRowCount = _page * 10;
     int rowCount = estimateRowCount > lk.length ? lk.length : estimateRowCount;
     for (int i = 0; i < rowCount; i++) {
-      lrow.add(this._contentTable(lk[i]));
+      Kontrak k = lk[i];
+      if (k.flagberakhir == 0) {
+        lrow.add(this._contentTable(lk[i]));
+      }
     }
     return lrow;
   }
@@ -354,7 +369,7 @@ class _CardDashboardState extends State<CardDashboard> {
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     double width = (mediaQueryData.size.width - 120) / 3;
-    if(width<400){
+    if (width < 400) {
       width = 400;
     }
     List<Kontrak> lkontrak = widget.lkontrak;

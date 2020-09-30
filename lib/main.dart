@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        fontFamily: 'Opensans',
+        fontFamily:'Opensans',
       ),
       title: _title,
 //      home: DKontrak(null),

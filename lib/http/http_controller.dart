@@ -24,14 +24,14 @@ class HttpAction {
         //print('masuk sini1');
         // If the server did return a 200 OK response,
         // then parse the JSON.
-        // print(response.body);
+        print(response.body);
         return json.decode(response.body);
       } else {
-        // print('masuk sini2');
+         print('masuk sini2');
         return null;
       }
     } catch (e) {
-      print(e.toString());
+      print('ERROR: ${e.toString()}');
       return null;
     }
   }

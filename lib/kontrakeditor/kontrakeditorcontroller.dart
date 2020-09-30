@@ -9,10 +9,11 @@ class KontrakEditorController extends StatefulWidget {
   final EnumStateEditor enumStateEditor;
   final Kontrak kontrak;
   final Function callbackFinish;
+  final Function callbackFromDetail;
 
-  KontrakEditorController.baru(this.callbackFinish,{this.enumStateEditor=EnumStateEditor.baru,this.kontrak});
+  KontrakEditorController.baru(this.callbackFromDetail,this.callbackFinish,{this.enumStateEditor=EnumStateEditor.baru,this.kontrak});
 
-  KontrakEditorController.editmode(this.callbackFinish,this.kontrak,{this.enumStateEditor=EnumStateEditor.edit});
+  KontrakEditorController.editmode(this.callbackFromDetail,this.callbackFinish,this.kontrak,{this.enumStateEditor=EnumStateEditor.edit});
   @override
   _KontrakEditorControllerState createState() => _KontrakEditorControllerState();
 }
@@ -35,6 +36,8 @@ class _KontrakEditorControllerState extends State<KontrakEditorController> {
       _isStateEditor = false;
     });
   }
+
+  _callbackFromDetail(){}
   
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,7 @@ class _KontrakEditorControllerState extends State<KontrakEditorController> {
        return KontrakEditor.editmode(_callbackFinishEditor,_cacheKontrak);
      }
     }else{
-      return DetailKontrak(_cacheKontrak);
+      return DetailKontrak(_callbackFromDetail,_cacheKontrak);
     }
    
   }

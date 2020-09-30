@@ -7,13 +7,15 @@ import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/ConstantaApp.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
+import 'package:loading_animations/loading_animations.dart';
 
 final double widthCell = 200.0;
 
 class DetailKontrak extends StatefulWidget {
   final Kontrak kontrak;
+  final Function callbackChangeFlagBerakhir;
 
-  DetailKontrak(this.kontrak);
+  DetailKontrak(this.callbackChangeFlagBerakhir,this.kontrak);
 
   @override
   _DetailKontrakState createState() => _DetailKontrakState();
@@ -22,6 +24,8 @@ class DetailKontrak extends StatefulWidget {
 class _DetailKontrakState extends State<DetailKontrak> {
   final _scrollControllerUtama = ScrollController();
   final _scrollControllerTable = ScrollController();
+  final Color colorButton = Colors.cyan[600];
+  final Color colorTextBtn = Colors.white;
   BlocDetailKontrak _blocDetailKontrak;
 
   @override
@@ -55,6 +59,16 @@ class _DetailKontrakState extends State<DetailKontrak> {
               double width = MediaQuery.of(context).size.width / 20;
               double widthtable = width * 19;
               double widhtLog = width * 16;
+
+              Widget icon;
+              if (itemDetailKontrak.kontrak.flagberakhir == 0) {
+                icon = Icon(Icons.hourglass_empty_outlined);
+              } else {
+                icon = Icon(
+                  Icons.hourglass_disabled_outlined,
+                  color: Colors.red,
+                );
+              }
               return Scaffold(
                 body: Scrollbar(
                   controller: _scrollControllerUtama,
@@ -95,18 +109,31 @@ class _DetailKontrakState extends State<DetailKontrak> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 20),
-                                          child: RaisedButton(
-                                            onPressed: () {
-                                              _clickEditKontrak(
-                                                  itemDetailKontrak.kontrak);
-                                            },
-                                            color: Colors.cyan[600],
-                                            textColor: Colors.white,
-                                            child: Text('Edit'),
-                                          )),
+                                      Row(
+                                        children: [
+                                          Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 20),
+                                              child: IconButton(
+                                                  icon: icon,
+                                                  onPressed: () async {
+                                                    this._handleBerakhir(itemDetailKontrak.kontrak);
+                                                  })),
+                                          Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 20),
+                                              child: RaisedButton(
+                                                onPressed: () {
+                                                  _clickEditKontrak(
+                                                      itemDetailKontrak
+                                                          .kontrak);
+                                                },
+                                                color: Colors.cyan[600],
+                                                textColor: Colors.white,
+                                                child: Text('Edit'),
+                                              )),
+                                        ],
+                                      ),
                                       SizedBox(
                                         height: 10,
                                       ),
@@ -168,13 +195,172 @@ class _DetailKontrakState extends State<DetailKontrak> {
 
   void _clickEditKontrak(Kontrak kontrak) async {
     print('edit di klik');
-    int result = await openPage(context, KontrakEditor.editmode(_callback, kontrak,isfromdetail: true,));
-    if([1].contains(result)){
+    int result = await openPage(
+        context,
+        KontrakEditor.editmode(
+          _callback,
+          kontrak,
+          isfromdetail: true,
+        ));
+    if ([1].contains(result)) {
       print('setelah di edit');
       _blocDetailKontrak.reloadFromInternet(null);
     }
   }
 
+  void _handleBerakhir( Kontrak kontrak) async {
+    bool isberakhir = false;
+    if(kontrak.flagberakhir==1)isberakhir=true;
+    await _showDialogConfirmBerakhir(context,kontrak,isberakhir);
+  }
+
+  Future _showDialogConfirmBerakhir(BuildContext context,Kontrak kontrak,bool isberakhir) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: 'Apakah anda yakin akan menandai kontrak  ',
+              style: TextStyle(fontSize: 14,color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                    text: kontrak.noKontrak==null?'':'${kontrak.noKontrak}',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: isberakhir?' sebagai masih aktif?':' sebagai sudah berakhir?'),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  int flagvalue;
+                  isberakhir?flagvalue=0:flagvalue=1;
+                  _confirmedBerakhir(kontrak,flagvalue);
+                },
+                child: Text(
+                  'Ya',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              ),
+            ),
+          ],
+        ));
+  }
+
+  Future _loadingWaiting(BuildContext context,String text) {
+    return showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: '$text ',
+              style: TextStyle(fontSize: 14,color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                  text: '\n',),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            LoadingBouncingLine.circle(backgroundColor: Colors.deepOrange),
+          ],
+        ));
+  }
+
+  void _confirmedBerakhir(kontrak,int valueflag){
+    this._loadingWaiting(context, 'Merubah status kontrak ...');
+    _blocDetailKontrak.editflagberakhirKontrak(kontrak,valueflag).then((value) {
+      Navigator.of(context).pop();
+      if(value){
+        _blocDetailKontrak.reloadDataLocal();
+        widget.callbackChangeFlagBerakhir();
+      }else{
+        this._infoError(context, 'Terjadi kesalahan saat mengupdate data.');
+      }
+    });
+  }
+
+  Future _infoError(BuildContext context, String text) {
+    return showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => SimpleDialog(
+          title: RichText(
+            text: TextSpan(
+              text: '$text ',
+              style: TextStyle(fontSize: 14, color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                  text: '\n',
+                ),
+              ],
+            ),
+          ),
+          //             title: Text('Apakah anda yakin akan menghapus kontrak?\n Menghapus kontrak artinya semua dokumen yang\n berhubungan dengan kontrak ini juga akan di hapus.'),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  right: 16.0, left: 16.0, bottom: 3.0),
+              child: RaisedButton(
+                color: colorButton,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(color: Colors.cyan)),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Ok',
+                  style: TextStyle(
+                      color: colorTextBtn,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              ),
+            ),
+          ],
+        ));
+  }
   void _callback(Kontrak kontrak) {
     print('callback di detail kontrak: ${kontrak.toString()}');
   }
@@ -481,13 +667,6 @@ class _Table5columnState extends State<Table5column> {
 //          border: TableBorder.all(
 //              color: Colors.black26, width: 1, style: BorderStyle.none),
       children: [
-//        TableRow(children: [
-//          _valueLabel(DataTableConstants.colNmUnit, _kontrak.namaUnit),
-//          _valueLabel(DataTableConstants.colRegion, _kontrak.region),
-//          _valueLabel(DataTableConstants.colStream, _kontrak.stream),
-//          _valueLabel(DataTableConstants.colDurasi, '${_kontrak.durasi}'),
-//          _valueLabel(DataTableConstants.colNilai, '${_kontrak.nilai}'),
-//        ]),
         TableRow(children: [
           LabelDetailKontrakType2(textLabel: DataTableConstants.colNmUnit),
           LabelDetailKontrakType2(textLabel: DataTableConstants.colRegion),
@@ -496,24 +675,14 @@ class _Table5columnState extends State<Table5column> {
           LabelDetailKontrakType2(textLabel: DataTableConstants.colNilai),
         ]),
         TableRow(children: [
-          LabelDetailKontrakType2(
-              textContent: '${_kontrak.namaUnit}'),
+          LabelDetailKontrakType2(textContent: '${_kontrak.namaUnit}'),
           LabelDetailKontrakType2(textContent: _kontrak.region),
           LabelDetailKontrakType2(textContent: _kontrak.textStream),
           LabelDetailKontrakType2(textContent: '${_kontrak.durasi}'),
-          LabelDetailKontrakType2(textContent: '${_kontrak.getFormatedNilai()}'),
+          LabelDetailKontrakType2(
+              textContent: '${_kontrak.getFormatedNilai()}'),
         ]),
         _forPadding(30.0),
-//        TableRow(children: [
-//          _valueLabel(DataTableConstants.colDireksi, _kontrak.direksi),
-//          _valueLabel(
-//              DataTableConstants.colPenandatangan, _kontrak.penandatangan),
-//          _valueLabel(DataTableConstants.colTglMulai, _kontrak.strTglMulai),
-//          _valueLabel(
-//              DataTableConstants.colTglBerakhir, _kontrak.strTglBerakhir),
-//          _valueLabel('Kontrak Awal', 'Kosong'),
-//        ]),
-
         TableRow(children: [
           LabelDetailKontrakType2(textLabel: DataTableConstants.colDireksi),
           LabelDetailKontrakType2(

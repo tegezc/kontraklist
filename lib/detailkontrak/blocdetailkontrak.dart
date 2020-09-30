@@ -8,6 +8,7 @@ import 'package:listkontrakapp/http/http_controller.dart';
 class BlocDetailKontrak {
 
   Kontrak _cacheKontrak;
+  ItemDetailKontrak _cacheItemDetailKontrak;
   Map<String,String> _cacheStream;
 
   final PublishSubject<ItemDetailKontrak> _itemDetailkontrak =
@@ -23,6 +24,7 @@ class BlocDetailKontrak {
      _cacheStream = Map();
     _cacheKontrak = kontrak;
     ItemDetailKontrak item = await this._processFromInternet(kontrak);
+     _cacheItemDetailKontrak = item;
     this.itemDetailkontrakSink.add(item);
   }
 
@@ -75,6 +77,7 @@ class BlocDetailKontrak {
     String textStream = _cacheStream[_cacheKontrak.stream];
     _cacheKontrak.textStream = textStream;
     ItemDetailKontrak itemDetailKontrak =  new ItemDetailKontrak(_cacheKontrak, ldpe, ldtor, ldst, ldhps, ldsp,jnsdoc,EnumLoadingStateDetKon.finish);
+   _cacheItemDetailKontrak = itemDetailKontrak;
     this.itemDetailkontrakSink.add(itemDetailKontrak);
 
   }
@@ -97,6 +100,27 @@ class BlocDetailKontrak {
 
     return await httpAction.downloadDoc(iddokumen, enumFileDokumen);
   }
+
+  Future<bool> editflagberakhirKontrak(Kontrak kontrak,int flagvalue) async {
+    kontrak.setFlagBerakhir(flagvalue);
+
+    HttpAction httpAction = new HttpAction();
+    Map<String, dynamic> response = await httpAction.editKontrak(kontrak);
+    if (response != null) {
+     _cacheKontrak.setFlagBerakhir(flagvalue);
+     _cacheItemDetailKontrak.kontrak = _cacheKontrak;
+     return true;
+    }
+    return false;
+  }
+
+  void reloadDataLocal(){
+    String textStream = _cacheStream[_cacheKontrak.stream];
+    _cacheKontrak.textStream = textStream;
+
+    this.itemDetailkontrakSink.add(_cacheItemDetailKontrak);
+  }
+
 
   List<LogDokumen> _convertJsonToList(List<dynamic> ljson) {
     List<LogDokumen> ldoc = List();
