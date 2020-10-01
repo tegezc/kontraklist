@@ -10,6 +10,7 @@ import 'package:listkontrakapp/main.dart';
 import 'package:listkontrakapp/model/enum_app.dart';
 import 'package:listkontrakapp/model/kontrak.dart';
 import 'package:listkontrakapp/util/loadingnunggudatateko.dart';
+import 'package:listkontrakapp/util/textoverflowcustome.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -197,7 +198,7 @@ class _CardDashboardState extends State<CardDashboard> {
   final TextStyle _titleStyle =
       new TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
   final TextStyle _titleStyleContent = new TextStyle(
-    fontSize: 14,
+    fontSize: 11,color: Colors.black
   );
   Color _color;
   String _textHeader;
@@ -235,12 +236,15 @@ class _CardDashboardState extends State<CardDashboard> {
   List<DataColumn> _headerTable() {
     List<DataColumn> ldc = new List();
     ldc.add(DataColumn(
-        label: Center(
-            child: Text(
+        label: SizedBox(
+          width: 75,
+          child: Center(
+              child: Text(
       'No Kontrak',
       textAlign: TextAlign.center,
       style: _titleStyle,
-    ))));
+    )),
+        )));
 
     ldc.add(DataColumn(
         label: Center(
@@ -286,21 +290,22 @@ class _CardDashboardState extends State<CardDashboard> {
 
   Widget _textContentJudul(String text, Kontrak kontrak) {
     String tmpText = text == null ? '' : text;
-    bool isCut = false;
-    if(tmpText.length>100){
-      isCut = true;
-      tmpText = tmpText.substring(0,95);
-    }
+//     bool isCut = true;
+    // if(tmpText.length>50){
+    //   isCut = true;
+    //   tmpText = tmpText.substring(0,45);
+    // }
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: RichText(
-        text: TextSpan(
-          text: tmpText,
-          style: DefaultTextStyle.of(context).style,
-          children: <TextSpan>[
-            TextSpan(text: isCut?' [...]':'', style: TextStyle(fontWeight: FontWeight.bold,)),
-          ],
-        ),
+      child: MyText(
+        "$tmpText",
+        overflow:TextOverflow.ellipsis,
+        maxLines: 3,
+        style: _titleStyleContent,
+        overflowBuilder: (size) {
+          return new TextSpan(
+              text: "", style: new TextStyle(color: Colors.red));
+        },
       ),
     );
   }
@@ -351,7 +356,7 @@ class _CardDashboardState extends State<CardDashboard> {
                 height: 5,
               ),
               DataTable(
-                dataRowHeight: 70.0,
+                dataRowHeight: 55.0,
                 columnSpacing: 20.0,
                 showCheckboxColumn: false,
                 columns: this._headerTable(),
@@ -381,8 +386,8 @@ class _CardDashboardState extends State<CardDashboard> {
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     double width = (mediaQueryData.size.width - 120) / 3;
-    if (width < 400) {
-      width = 400;
+    if (width < 358) {
+      width = 358;
     }
     List<Kontrak> lkontrak = widget.lkontrak;
     return _cardKontrak(lkontrak, width);

@@ -332,7 +332,7 @@ void _defaultValue(){
 
   Widget _cardInternalPerusahaan(double width, Kontrak kontrakawal) {
     String txtMulai = _dtMulai == null
-        ? 'Belum ditentkan'
+        ? 'Belum ditentukan'
         : _processString.dateToStringDdMmmYyyyShort(_dtMulai);
     String txtBerakhir = _dtBerakhir == null
         ? 'Belum ditentukan'
