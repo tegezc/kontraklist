@@ -78,10 +78,15 @@ class Kontrak {
     int flag = json[DataJSONCons.fieldFlagBerakhir] == null
         ? 0
         : int.parse(json[DataJSONCons.fieldFlagBerakhir]);
-
+    String strnokon ;
+    if(json[DataJSONCons.fieldNoKontrak]==null){
+      strnokon = json[DataJSONCons.fieldNoKontrak];
+    }else{
+      strnokon = json[DataJSONCons.fieldNoKontrak].trim();
+    }
     this.id = idk;
     this.realID = realid;
-    this._noKontrak = json[DataJSONCons.fieldNoKontrak];
+    this._noKontrak = strnokon;
     this._nama = json[DataJSONCons.fieldNmKontrak];
     this._namaUnit = json[DataJSONCons.fieldNmUnit];
     this._anakPerusahaan = json[DataJSONCons.fieldAnakperusahaan];
@@ -190,7 +195,7 @@ class Kontrak {
     try {
       _nilai = int.parse(value);
     } catch (e) {
-      throw (e);
+      _nilai = 0;
     }
   }
 
@@ -278,10 +283,10 @@ class Kontrak {
       DataJSONCons.fieldStream: _stream,
       DataJSONCons.fieldDurasi: _durasi,
       DataJSONCons.fieldNilai: _nilai,
-      DataJSONCons.fieldTglMulai:
-          _processString.dateToStringDdMmYyyy(_tglMulai),
-      DataJSONCons.fieldTglBerakhir:
-          _processString.dateToStringDdMmYyyy(_tglBerakhir),
+      DataJSONCons.fieldTglMulai:_tglMulai!=null?
+          _processString.dateToStringDdMmYyyy(_tglMulai):null,
+      DataJSONCons.fieldTglBerakhir:_tglBerakhir!=null?
+          _processString.dateToStringDdMmYyyy(_tglBerakhir):null,
       DataJSONCons.fieldNmPicKontrak: _nmPICKontrak,
       DataJSONCons.fieldNoHpPicKontrak: _noHpPICKontrak,
       DataJSONCons.fieldEmailPicKontrak: _emailPICKontrak,

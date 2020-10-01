@@ -362,7 +362,7 @@ class _DetailKontrakState extends State<DetailKontrak> {
         ));
   }
   void _callback(Kontrak kontrak) {
-    print('callback di detail kontrak: ${kontrak.toString()}');
+   // print('callback di detail kontrak: ${kontrak.toString()}');
   }
 
   Future openPage(context, Widget builder) async {

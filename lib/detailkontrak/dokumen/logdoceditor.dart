@@ -134,7 +134,7 @@ class _LogDocEditorFormState extends State<LogDocEditorForm> {
   void _setupInit() {
 
     _logDokumen = widget.itemDokumenEditor.logDokumen;
-    print(_logDokumen.toString());
+  //  print(_logDokumen.toString());
     _tanggal = _logDokumen.tanggal;
     _keteranganTextController.text = _logDokumen.keterangan;
     _namaTextController.text = _logDokumen.namaReviewer;

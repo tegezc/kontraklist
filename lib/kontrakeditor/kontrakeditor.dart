@@ -210,30 +210,35 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
     _dropDownStream =
         _getDropDownMenuItems(widget.itemEditorKontrak.listStream);
     _currentStream = _dropDownStream[0].value;
-    _testOnly();
+    _defaultValue();
   }
-
-  void _testOnly() {
-    _currentStream = _dropDownStream[1].value;
-    _dtMulai = DateTime.now();
-    _dtBerakhir = DateTime(_dtMulai.year + 2, _dtMulai.month, _dtMulai.day);
-    _noKontrakTextController.text = 'RR20200101SS';
-    _namaKontrakTextController.text = 'Pengadaan Aplikasi';
-    _unitTextController.text = 'Unit 1';
-    _anakPerusahaanTextController.text = 'PT Anak Nusantara';
-    _regionTextController.text = 'Region 1';
-    _durasiTextController.text = '24';
-    _nilaiKontrakTextController.text = '1000000000';
-    _nmPicKontrakTextController.text = 'Dermawan';
-    _noHpPicKontrakTextController.text = '081767876545';
-    _emailPicKontrakTextController.text = 'coba@coooo.com';
-    _nmVendorPemenangTextController.text = 'PT Vendor';
-    _nmPicVendorTextController.text = 'Asep';
-    _noHpPicVendorTextController.text = '081804378767';
-    _emailPicVendorTextController.text = 'coba@coba.com';
-    _direksiPekerjaanTextController.text = 'Direktur';
-    _penandaTanganKontrakTextController.text = 'Direktur';
-  }
+void _defaultValue(){
+  _noKontrakTextController.text = 'SP-';
+  _unitTextController.text = 'Persero';
+  _anakPerusahaanTextController.text = 'Persero';
+  _emailPicKontrakTextController.text = 'user.email@pertamina.com';
+}
+  // void _testOnly() {
+  //   _currentStream = _dropDownStream[1].value;
+  //   _dtMulai = DateTime.now();
+  //   _dtBerakhir = DateTime(_dtMulai.year + 2, _dtMulai.month, _dtMulai.day);
+  //   _noKontrakTextController.text = 'RR20200101SS';
+  //   _namaKontrakTextController.text = 'Pengadaan Aplikasi';
+  //   _unitTextController.text = 'Unit 1';
+  //   _anakPerusahaanTextController.text = 'PT Anak Nusantara';
+  //   _regionTextController.text = 'Fungsi KP/Region/AP';
+  //   _durasiTextController.text = '24';
+  //   _nilaiKontrakTextController.text = '1000000000';
+  //   _nmPicKontrakTextController.text = 'Dermawan';
+  //   _noHpPicKontrakTextController.text = '081767876545';
+  //   _emailPicKontrakTextController.text = 'coba@coooo.com';
+  //   _nmVendorPemenangTextController.text = 'PT Vendor';
+  //   _nmPicVendorTextController.text = 'Asep';
+  //   _noHpPicVendorTextController.text = '081804378767';
+  //   _emailPicVendorTextController.text = 'coba@coba.com';
+  //   _direksiPekerjaanTextController.text = 'Direktur';
+  //   _penandaTanganKontrakTextController.text = 'Direktur';
+  // }
 
   Widget _shortField(
       String text,
@@ -376,7 +381,7 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
                 SizedBox(
                     width: w * 6,
                     child: _shortField(
-                        'Region:',
+                        'Fungsi KP/Region/AP:',
                         EnumValidatorTextFieldForm.bebas,
                         EnumFieldState.draft,
                         _regionTextController,

@@ -35,21 +35,23 @@ class _DashboardState extends State<Dashboard> {
   void _setupInit() async {
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response = await httpAction.getDashboardData();
+    if (response != null) {
+      List<dynamic> data90 = response['1'];
+      List<dynamic> data180 = response['2'];
+      List<dynamic> data360 = response['3'];
 
-    List<dynamic> data90 = response['1'];
-    List<dynamic> data180 = response['2'];
-    List<dynamic> data360 = response['3'];
+      List<Kontrak> lkontrak90 = List();
+      List<Kontrak> lkontrak180 = List();
+      List<Kontrak> lkontrak360 = List();
 
-    List<Kontrak> lkontrak90 = List();
-    List<Kontrak> lkontrak180 = List();
-    List<Kontrak> lkontrak360 = List();
+      lkontrak90.addAll(this._listKontrak(data90));
+      lkontrak180.addAll(this._listKontrak(data180));
+      lkontrak360.addAll(this._listKontrak(data360));
+      setState(() {
+        _entryAllKontrak = EntryAllKontrak(lkontrak90, lkontrak180, lkontrak360);
+      });
+    }
 
-    lkontrak90.addAll(this._listKontrak(data90));
-    lkontrak180.addAll(this._listKontrak(data180));
-    lkontrak360.addAll(this._listKontrak(data360));
-    setState(() {
-      _entryAllKontrak = EntryAllKontrak(lkontrak90, lkontrak180, lkontrak360);
-    });
   }
 
   List<Kontrak> _listKontrak(List<dynamic> ljson) {
@@ -73,7 +75,8 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _clickKontrakBaru() async {
-    await openPage(context, KontrakEditorController.baru(_callbackFromDetail,_callbackfinish));
+    await openPage(context,
+        KontrakEditorController.baru(_callbackFromDetail, _callbackfinish));
   }
 
   void _clickTampilkansemua() async {
@@ -151,18 +154,12 @@ class _DashboardState extends State<Dashboard> {
                 child: Wrap(
                   direction: Axis.horizontal,
                   children: [
-                   CardDashboard(
-                            _callbackFromDetail,
-                            EnumTypeDashboard.hari90,
-                            entryAllKontrak.lkontrak90),
-                    CardDashboard(
-                            _callbackFromDetail,
-                            EnumTypeDashboard.hari180,
-                            entryAllKontrak.lKontrak180),
-                    CardDashboard(
-                            _callbackFromDetail,
-                            EnumTypeDashboard.hari360,
-                            entryAllKontrak.lKontrak360),
+                    CardDashboard(_callbackFromDetail, EnumTypeDashboard.hari90,
+                        entryAllKontrak.lkontrak90),
+                    CardDashboard(_callbackFromDetail,
+                        EnumTypeDashboard.hari180, entryAllKontrak.lKontrak180),
+                    CardDashboard(_callbackFromDetail,
+                        EnumTypeDashboard.hari360, entryAllKontrak.lKontrak360),
                   ],
                 ),
               ),
@@ -178,11 +175,7 @@ class _DashboardState extends State<Dashboard> {
     if (_entryAllKontrak == null) {
       return LoadingNunggu('Sedang mengambil data...');
     } else {
-     // if (_entryAllKontrak.isHasData()) {
-        return _scaffoldPage(_entryAllKontrak);
-      // } else {
-      //   return BelumAdaData();
-      // }
+      return _scaffoldPage(_entryAllKontrak);
     }
   }
 }
@@ -204,7 +197,7 @@ class _CardDashboardState extends State<CardDashboard> {
   final TextStyle _titleStyle =
       new TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
   final TextStyle _titleStyleContent = new TextStyle(
-    fontSize: 10,
+    fontSize: 14,
   );
   Color _color;
   String _textHeader;
@@ -245,6 +238,7 @@ class _CardDashboardState extends State<CardDashboard> {
         label: Center(
             child: Text(
       'No Kontrak',
+      textAlign: TextAlign.center,
       style: _titleStyle,
     ))));
 
@@ -252,6 +246,7 @@ class _CardDashboardState extends State<CardDashboard> {
         label: Center(
             child: Text(
       'Nama Kontrak',
+      textAlign: TextAlign.center,
       style: _titleStyle,
     ))));
 
@@ -261,10 +256,12 @@ class _CardDashboardState extends State<CardDashboard> {
       children: [
         Text(
           'Tanggal',
+          textAlign: TextAlign.center,
           style: _titleStyle,
         ),
         Text(
           'Berakhir',
+          textAlign: TextAlign.center,
           style: _titleStyle,
         )
       ],
@@ -289,9 +286,22 @@ class _CardDashboardState extends State<CardDashboard> {
 
   Widget _textContentJudul(String text, Kontrak kontrak) {
     String tmpText = text == null ? '' : text;
+    bool isCut = false;
+    if(tmpText.length>100){
+      isCut = true;
+      tmpText = tmpText.substring(0,95);
+    }
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Text(tmpText, style: _titleStyleContent),
+      child: RichText(
+        text: TextSpan(
+          text: tmpText,
+          style: DefaultTextStyle.of(context).style,
+          children: <TextSpan>[
+            TextSpan(text: isCut?' [...]':'', style: TextStyle(fontWeight: FontWeight.bold,)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -307,7 +317,7 @@ class _CardDashboardState extends State<CardDashboard> {
     for (int i = 0; i < rowCount; i++) {
       Kontrak k = lk[i];
       if (k.flagberakhir == 0) {
-        lrow.add(this._contentTable(lk[i]));
+        lrow.add(this._contentTable(k));
       }
     }
     return lrow;
@@ -341,6 +351,8 @@ class _CardDashboardState extends State<CardDashboard> {
                 height: 5,
               ),
               DataTable(
+                dataRowHeight: 70.0,
+                columnSpacing: 20.0,
                 showCheckboxColumn: false,
                 columns: this._headerTable(),
                 rows: this._table(lkon),

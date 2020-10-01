@@ -116,8 +116,12 @@ class BlocShowAll {
 
       ///========================
       if (_currentType == 1) {
-        listHasilFilter =
-            _listKontrak.where((kontrak) => kontrak.noKontrak == null).toList();
+        listHasilFilter = _listKontrak.where((kontrak) {
+          if ([null, ''].contains(kontrak.noKontrak)) {
+            return true;
+          }
+          return false;
+        }).toList();
 
         _listKontrak = listHasilFilter;
       } else if (_currentType == 2) {
@@ -233,8 +237,9 @@ class BlocShowAll {
   //   return false;
   // }
 
-  Future<Kontrak> editflagberakhirKontrak(Kontrak kontrak,int flagvalue) async {
-   kontrak.setFlagBerakhir(flagvalue);
+  Future<Kontrak> editflagberakhirKontrak(
+      Kontrak kontrak, int flagvalue) async {
+    kontrak.setFlagBerakhir(flagvalue);
 
     HttpAction httpAction = new HttpAction();
     Map<String, dynamic> response = await httpAction.editKontrak(kontrak);

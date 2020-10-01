@@ -10,7 +10,7 @@ class DataTableConstants {
   static const String colNoKontrak = 'No Kontrak';
   static const String colNmKontrak = 'Nama';
   static const String colNmUnit = 'Nama Unit / AP';
-  static const String colRegion = 'Region';
+  static const String colRegion = 'Fungsi KP/Region/AP';
   static const String colStream = 'Stream';
   static const String colDurasi = 'Durasi (Bulan)';
   static const String colNilai = 'Nilai';

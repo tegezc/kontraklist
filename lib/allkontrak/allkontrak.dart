@@ -197,7 +197,7 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
                       child: PaginatedDataTable(
                         sortAscending: itemShowAll.asc,
                         sortColumnIndex: itemShowAll.sortIndex,
-                        columnSpacing: 40,
+                        columnSpacing: 20,
                         source: _dtsKontrak,
                         header: Center(child: Text(DataTableConstants.dtTitle)),
                         onRowsPerPageChanged: (r) {
@@ -251,7 +251,6 @@ class _ShowAllKontrakState extends State<ShowAllKontrak> {
                           DataColumn(
                               label: Text(DataTableConstants.colNilai),
                               onSort: (colIndex, asc) {
-                                print('nilai; $asc');
                                 _sort<num>((kontrak) => kontrak.nilai, colIndex,
                                     asc, _dtsKontrak);
                               },
