@@ -200,6 +200,8 @@ class _CardDashboardState extends State<CardDashboard> {
   final TextStyle _titleStyleContent = new TextStyle(
     fontSize: 11,color: Colors.black
   );
+
+  final int _multipleMore = 10;
   Color _color;
   String _textHeader;
   int _page = 1;
@@ -317,7 +319,7 @@ class _CardDashboardState extends State<CardDashboard> {
 
   List<DataRow> _table(List<Kontrak> lk) {
     List<DataRow> lrow = new List();
-    int estimateRowCount = _page * 10;
+    int estimateRowCount = _page * _multipleMore;
     int rowCount = estimateRowCount > lk.length ? lk.length : estimateRowCount;
     for (int i = 0; i < rowCount; i++) {
       Kontrak k = lk[i];
@@ -330,7 +332,7 @@ class _CardDashboardState extends State<CardDashboard> {
 
   Widget _cardKontrak(List<Kontrak> lkon, double width) {
     bool ismorevisible = false;
-    if (lkon.length > _page * 10) {
+    if (lkon.length > _page * _multipleMore) {
       ismorevisible = true;
     }
     return Card(

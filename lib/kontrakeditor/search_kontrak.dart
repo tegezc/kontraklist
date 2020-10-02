@@ -44,7 +44,7 @@ class _SearchKontrakState extends State<SearchKontrak> {
   void _handleOnchageTextField(String str) {
     _listHasilSearch = _listKontrak
         .where((kontrak) =>
-            kontrak.noKontrak.toLowerCase().contains(str.toLowerCase()))
+            kontrak.nama.toLowerCase().contains(str.toLowerCase()))
         .toList();
     if(_listHasilSearch !=null){
       _listHasilSearch.insert(0, _kontrakKosong);
@@ -111,7 +111,7 @@ class _SearchKontrakState extends State<SearchKontrak> {
                     ),
                     decoration: InputDecoration(
                       //Add th Hint text here.
-                      hintText: "Masukkan Nomor Kontrak",
+                      hintText: "Masukkan Nama Kontrak",
                       border: OutlineInputBorder(),
                     ),
                   ),

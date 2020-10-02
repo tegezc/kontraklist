@@ -109,6 +109,9 @@ class _KontrakEditorFormState extends State<KontrakEditorForm> {
   final TextStyle _stylePeringatan =
       TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.red);
 
+  final TextStyle _styleCombobox =
+  new TextStyle(fontSize: 12, color: Colors.black);
+
   final Color colorButton = Colors.cyan[600];
   final Color colorTextBtn = Colors.white;
 
@@ -391,7 +394,7 @@ void _defaultValue(){
                       const EdgeInsets.only(top: 40.0, right: 24, left: 20),
                   child: Text(
                     'Stream:',
-                    style: TextStyle(color: Colors.blue, fontSize: 16),
+                    style: TextStyle(color: Colors.blue, fontSize: 14),
                   ),
                 ),
                 Padding(
@@ -520,14 +523,14 @@ void _defaultValue(){
         value: sk.realId,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: new Text(sk.nama),
+          child: new Text(sk.nama,style:_styleCombobox),
         )));
     for (StreamKontrak stream in lstream) {
       items.add(new DropdownMenuItem(
           value: stream.realId,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: new Text(stream.nama),
+            child: new Text(stream.nama,style: _styleCombobox,),
           )));
     }
     return items;
